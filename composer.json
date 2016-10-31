@@ -1,0 +1,31 @@
+{
+    "name": "clue/http-proxy-react",
+    "description": "Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP proxy server, built on top of React PHP",
+    "keywords": ["HTTP", "CONNECT", "proxy", "ReactPHP", "async"],
+    "homepage": "https://github.com/clue/php-http-proxy-react",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Lück",
+            "email": "christian@lueck.tv"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "Clue\\React\\HttpProxy\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\Clue\\React\\HttpProxy\\": "tests/" }
+    },
+    "require": {
+        "php": ">=5.3",
+        "react/socket-client": "^0.5 || ^0.4 || ^0.3",
+        "react/event-loop": "^0.4 || ^0.3",
+        "react/stream": "^0.4 || ^0.3",
+        "react/promise": " ^2.1 || ^1.2",
+        "ringcentral/psr7": "^1.2"
+    },
+    "require-dev": {
+        "react/socket-client": "^0.5",
+        "clue/block-react": "^1.1"
+    }
+}
