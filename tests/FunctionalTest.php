@@ -39,6 +39,10 @@ class FunctionalTest extends AbstractTestCase
 
     public function testSecureGoogleDoesNotAcceptConnectMethod()
     {
+        if (!function_exists('stream_socket_enable_crypto')) {
+            $this->markTestSkipped('TLS not supported on really old platforms (HHVM < 3.8)');
+        }
+
         $secure = new SecureConnector($this->dnsConnector, $this->loop);
         $proxy = new ProxyConnector('google.com:443', $secure);
 
