@@ -197,7 +197,7 @@ MIT
   which also provides an implementation of the
   [`ConnectorInterface`](#connectorinterface) so that supporting either proxy
   protocol should be fairly trivial.
-* If you're dealing with publish proxies, you'll likely have to work with mixed
+* If you're dealing with public proxies, you'll likely have to work with mixed
   quality and unreliable proxies. You may want to look into using
   [clue/connection-manager-extra](https://github.com/clue/php-connection-manager-extra)
   which allows retrying unreliable ones, implying connection timeouts,
