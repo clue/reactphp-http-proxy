@@ -52,7 +52,7 @@ throughout React's ecosystem.
 Most higher-level components (such as HTTP, database or other networking
 service clients) accept an instance implementing this interface to create their
 TCP/IP connection to the underlying networking service.
-This is usually done via dependency injection, so its fairly simple to actually
+This is usually done via dependency injection, so it's fairly simple to actually
 swap this implementation against this library in order to connect through an
 HTTP CONNECT proxy.
 
@@ -60,7 +60,7 @@ The interface only offers a single method:
 
 #### create()
 
-The `create(string $host, int $port): PromiseInterface<Stream>` method
+The `create(string $host, int $port): PromiseInterface<Stream, Exception>` method
 can be used to establish a streaming connection.
 It returns a [Promise](https://github.com/reactphp/promise) which either
 fulfills with a [Stream](https://github.com/reactphp/stream) or
