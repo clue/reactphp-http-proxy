@@ -7,7 +7,7 @@ Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP prox
 * [Quickstart example](#quickstart-example)
 * [Usage](#usage)
   * [ConnectorInterface](#connectorinterface)
-    * [create()](#create)
+    * [connect()](#connect)
   * [ProxyConnector](#proxyconnector)
 * [Install](#install)
 * [Tests](#tests)
@@ -25,7 +25,7 @@ $connector = new TcpConnector($loop);
 $proxy = new ProxyConnector('127.0.0.1:8080', $connector);
 $ssl = new SecureConnector($proxy, $loop);
 
-$ssl->create('google.com', 443)->then(function (Stream $stream) {
+$ssl->connect('google.com:443')->then(function (ConnectionInterface $stream) {
     $stream->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
     $stream->on('data', function ($chunk) {
         echo $chunk;
@@ -59,17 +59,17 @@ HTTP CONNECT proxy.
 
 The interface only offers a single method:
 
-#### create()
+#### connect()
 
-The `create(string $host, int $port): PromiseInterface<Stream, Exception>` method
+The `connect(string $uri): PromiseInterface<ConnectionInterface, Exception>` method
 can be used to establish a streaming connection.
 It returns a [Promise](https://github.com/reactphp/promise) which either
-fulfills with a [Stream](https://github.com/reactphp/stream) or
+fulfills with a [ConnectionInterface](https://github.com/reactphp/socket-client#connectioninterface) or
 rejects with an `Exception`:
 
 ```php
-$connector->create('google.com', 443)->then(
-    function (Stream $stream) {
+$connector->connect('google.com:443')->then(
+    function (ConnectionInterface $stream) {
         // connection successfully established
     },
     function (Exception $error) {
@@ -121,7 +121,7 @@ connector is actually inherently a general-purpose plain TCP/IP connector:
 ```php
 $proxy = new ProxyConnector('127.0.0.1:8080', $connector);
 
-$proxy->create('smtp.googlemail.com', 587)->then(function (Stream $stream) {
+$proxy->connect('smtp.googlemail.com:587')->then(function (ConnectionInterface $stream) {
     $stream->write("EHLO local\r\n");
     $stream->on('data', function ($chunk) use ($stream) {
         echo $chunk;
@@ -141,7 +141,7 @@ instance:
 $proxy = new ProxyConnector('127.0.0.1:8080', $connector);
 $ssl = new SecureConnector($proxy, $loop);
 
-$ssl->create('smtp.googlemail.com', 465)->then(function (Stream $stream) {
+$ssl->connect('smtp.googlemail.com:465')->then(function (ConnectionInterface $stream) {
     $stream->write("EHLO local\r\n");
     $stream->on('data', function ($chunk) use ($stream) {
         echo $chunk;
@@ -163,7 +163,7 @@ instance to create a secure connection to the proxy:
 $ssl = new SecureConnector($connector, $loop);
 $proxy = new ProxyConnector('127.0.0.1:443', $ssl);
 
-$proxy->create('smtp.googlemail.com', 587);
+$proxy->connect('smtp.googlemail.com:587');
 ```
 
 ## Install

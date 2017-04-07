@@ -8,9 +8,9 @@
 // Please note that MANY public proxies do not allow SMTP connections, YMMV.
 
 use Clue\React\HttpProxy\ProxyConnector;
-use React\Stream\Stream;
 use React\SocketClient\TcpConnector;
 use React\SocketClient\SecureConnector;
+use React\SocketClient\ConnectionInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -22,7 +22,7 @@ $connector = new TcpConnector($loop);
 $proxy = new ProxyConnector($url, $connector);
 $ssl = new SecureConnector($proxy, $loop);
 
-$ssl->create('smtp.googlemail.com', 465)->then(function (Stream $stream) {
+$ssl->connect('smtp.googlemail.com:465')->then(function (ConnectionInterface $stream) {
     $stream->write("EHLO local\r\n");
     $stream->on('data', function ($chunk) use ($stream) {
         echo $chunk;

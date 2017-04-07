@@ -8,11 +8,11 @@
 // network protocol otherwise.
 
 use Clue\React\HttpProxy\ProxyConnector;
-use React\Stream\Stream;
 use React\SocketClient\TcpConnector;
 use React\SocketClient\SecureConnector;
 use React\SocketClient\DnsConnector;
 use React\Dns\Resolver\Factory;
+use React\SocketClient\ConnectionInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -31,7 +31,7 @@ if (isset($argv[1])) {
     $connector = new SecureConnector($dns, $loop);
 }
 
-$connector->create('google.com', 443)->then(function (Stream $stream) {
+$connector->connect('google.com:443')->then(function (ConnectionInterface $stream) {
     $stream->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
     $stream->on('data', function ($chunk) {
         echo $chunk;

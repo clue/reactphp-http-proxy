@@ -31,7 +31,7 @@ class FunctionalTest extends AbstractTestCase
     {
         $proxy = new ProxyConnector('google.com', $this->dnsConnector);
 
-        $promise = $proxy->create('google.com', 80);
+        $promise = $proxy->connect('google.com:80');
 
         $this->setExpectedException('RuntimeException', 'Method Not Allowed', 405);
         Block\await($promise, $this->loop, 3.0);
@@ -46,7 +46,7 @@ class FunctionalTest extends AbstractTestCase
         $secure = new SecureConnector($this->dnsConnector, $this->loop);
         $proxy = new ProxyConnector('google.com:443', $secure);
 
-        $promise = $proxy->create('google.com', 80);
+        $promise = $proxy->connect('google.com:80');
 
         $this->setExpectedException('RuntimeException', 'Method Not Allowed', 405);
         Block\await($promise, $this->loop, 3.0);
@@ -56,7 +56,7 @@ class FunctionalTest extends AbstractTestCase
     {
         $proxy = new ProxyConnector('google.com:443', $this->dnsConnector);
 
-        $promise = $proxy->create('google.com', 80);
+        $promise = $proxy->connect('google.com:80');
 
         $this->setExpectedException('RuntimeException', 'Connection to proxy lost');
         Block\await($promise, $this->loop, 3.0);
