@@ -53,7 +53,7 @@ abstract class AbstractTestCase extends PHPUnit_Framework_TestCase
      */
     protected function createCallableMock()
     {
-        return $this->getMock('Tests\\Clue\\React\\HttpProxy\\CallableStub');
+        return $this->getMockBuilder('Tests\\Clue\\React\\HttpProxy\\CallableStub')->getMock();
     }
 }
 
