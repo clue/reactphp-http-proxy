@@ -12,7 +12,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function setUp()
     {
-        $this->connector = $this->getMock('React\SocketClient\ConnectorInterface');
+        $this->connector = $this->getMockBuilder('React\SocketClient\ConnectorInterface')->getMock();
     }
 
     /**
