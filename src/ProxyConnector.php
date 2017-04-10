@@ -3,12 +3,12 @@
 namespace Clue\React\HttpProxy;
 
 use React\SocketClient\ConnectorInterface;
-use React\Stream\Stream;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use RingCentral\Psr7;
 use React\Promise\Deferred;
+use React\SocketClient\ConnectionInterface;
 
 /**
  * A simple Connector that uses an HTTP CONNECT proxy to create plain TCP/IP connections to any destination
@@ -40,8 +40,7 @@ use React\Promise\Deferred;
 class ProxyConnector implements ConnectorInterface
 {
     private $connector;
-    private $proxyHost;
-    private $proxyPort;
+    private $proxyUri;
 
     /**
      * Instantiate a new ProxyConnector which uses the given $proxyUrl
@@ -61,7 +60,7 @@ class ProxyConnector implements ConnectorInterface
         }
 
         $parts = parse_url($proxyUrl);
-        if (!$parts || !isset($parts['host'])) {
+        if (!$parts || !isset($parts['scheme'], $parts['host'])) {
             throw new InvalidArgumentException('Invalid proxy URL');
         }
 
@@ -70,13 +69,51 @@ class ProxyConnector implements ConnectorInterface
         }
 
         $this->connector = $connector;
-        $this->proxyHost = $parts['host'];
-        $this->proxyPort = $parts['port'];
+        $this->proxyUri = $parts['host'] . ':' . $parts['port'];
     }
 
-    public function create($host, $port)
+    public function connect($uri)
     {
-        return $this->connector->create($this->proxyHost, $this->proxyPort)->then(function (Stream $stream) use ($host, $port) {
+        if (strpos($uri, '://') === false) {
+            $uri = 'tcp://' . $uri;
+        }
+
+        $parts = parse_url($uri);
+        if (!$parts || !isset($parts['scheme'], $parts['host'], $parts['port']) || $parts['scheme'] !== 'tcp') {
+            return Promise\reject(new InvalidArgumentException('Invalid target URI specified'));
+        }
+
+        $host = trim($parts['host'], '[]');
+        $port = $parts['port'];
+
+        // construct URI to HTTP CONNECT proxy server to connect to
+        $proxyUri = $this->proxyUri;
+
+        // append path from URI if given
+        if (isset($parts['path'])) {
+            $proxyUri .= $parts['path'];
+        }
+
+        // parse query args
+        $args = array();
+        if (isset($parts['query'])) {
+            parse_str($parts['query'], $args);
+        }
+
+        // append hostname from URI to query string unless explicitly given
+        if (!isset($args['hostname'])) {
+            $args['hostname'] = $parts['host'];
+        }
+
+        // append query string
+        $proxyUri .= '?' . http_build_query($args, '', '&');;
+
+        // append fragment from URI if given
+        if (isset($parts['fragment'])) {
+            $proxyUri .= '#' . $parts['fragment'];
+        }
+
+        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($host, $port) {
             $deferred = new Deferred(function ($_, $reject) use ($stream) {
                 $reject(new RuntimeException('Operation canceled while waiting for response from proxy'));
                 $stream->close();
