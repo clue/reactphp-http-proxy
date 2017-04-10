@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 (2017-04-10)
+
+* Feature / BC break: Replace deprecated SocketClient with new Socket component
+  (#9 by @clue)
+
+  This implies that the `ProxyConnector` from this package now implements the
+  `React\Socket\ConnectorInterface` instead of the legacy
+  `React\SocketClient\ConnectorInterface`.
+
 ## 0.2.0 (2017-04-10)
 
 * Feature / BC break: Update SocketClient to v0.7 or v0.6 and
