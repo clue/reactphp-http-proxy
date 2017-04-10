@@ -47,7 +47,7 @@ establishing streaming connections, such as a normal TCP/IP connection.
 In order to use this library, you should understand how this integrates with its
 ecosystem.
 This base interface is actually defined in React's
-[SocketClient component](https://github.com/reactphp/socket-client) and used
+[Socket component](https://github.com/reactphp/socket) and used
 throughout React's ecosystem.
 
 Most higher-level components (such as HTTP, database or other networking
@@ -64,7 +64,7 @@ The interface only offers a single method:
 The `connect(string $uri): PromiseInterface<ConnectionInterface, Exception>` method
 can be used to establish a streaming connection.
 It returns a [Promise](https://github.com/reactphp/promise) which either
-fulfills with a [ConnectionInterface](https://github.com/reactphp/socket-client#connectioninterface) or
+fulfills with a [ConnectionInterface](https://github.com/reactphp/socket#connectioninterface) or
 rejects with an `Exception`:
 
 ```php
@@ -99,7 +99,7 @@ The proxy URL may or may not contain a scheme and port definition. The default
 port will be `80` for HTTP (or `443` for HTTPS), but many common HTTP proxy
 servers use custom ports.
 In its most simple form, the given connector will be a
-[`TcpConnector`](https://github.com/reactphp/socket-client#tcpconnector) if you
+[`TcpConnector`](https://github.com/reactphp/socket#tcpconnector) if you
 want to connect to a given IP address as above.
 
 This is the main class in this package.
@@ -134,7 +134,7 @@ Many (public) proxy servers do in fact limit this to HTTPS (443) only.
 
 If you want to establish a TLS connection (such as HTTPS) between you and
 your destination, you may want to wrap this connector in a
-[`SecureConnector`](https://github.com/reactphp/socket-client#secureconnector)
+[`SecureConnector`](https://github.com/reactphp/socket#secureconnector)
 instance:
 
 ```php
@@ -156,7 +156,7 @@ destination host as above.
 
 If you want to connect to a (rather rare) HTTPS proxy, you may want use its
 HTTPS port (443) and use a
-[`SecureConnector`](https://github.com/reactphp/socket-client#secureconnector)
+[`SecureConnector`](https://github.com/reactphp/socket#secureconnector)
 instance to create a secure connection to the proxy:
 
 ```php
@@ -206,7 +206,7 @@ MIT
 * If you want to learn more about how the
   [`ConnectorInterface`](#connectorinterface) and its usual implementations look
   like, refer to the documentation of the underlying
-  [react/socket-client](https://github.com/reactphp/socket-client) component.
+  [react/socket](https://github.com/reactphp/socket) component.
 * As an alternative to an HTTP CONNECT proxy, you may also want to look into
   using a SOCKS (SOCKS4/SOCKS5) proxy instead.
   You may want to use [clue/socks-react](https://github.com/clue/php-socks-react)

@@ -2,13 +2,13 @@
 
 namespace Clue\React\HttpProxy;
 
-use React\SocketClient\ConnectorInterface;
+use React\Socket\ConnectorInterface;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use RingCentral\Psr7;
 use React\Promise\Deferred;
-use React\SocketClient\ConnectionInterface;
+use React\Socket\ConnectionInterface;
 
 /**
  * A simple Connector that uses an HTTP CONNECT proxy to create plain TCP/IP connections to any destination

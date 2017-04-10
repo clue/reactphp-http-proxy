@@ -18,7 +18,7 @@
     },
     "require": {
         "php": ">=5.3",
-        "react/socket-client": "^0.7 || ^0.6",
+        "react/socket": "^0.7.1",
         "react/event-loop": "^0.4 || ^0.3",
         "react/promise": " ^2.1 || ^1.2",
         "ringcentral/psr7": "^1.2"

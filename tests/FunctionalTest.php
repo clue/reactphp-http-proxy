@@ -4,10 +4,10 @@ namespace Tests\Clue\React\HttpProxy;
 
 use React\EventLoop\Factory;
 use Clue\React\HttpProxy\ProxyConnector;
-use React\SocketClient\TcpConnector;
-use React\SocketClient\DnsConnector;
+use React\Socket\TcpConnector;
+use React\Socket\DnsConnector;
 use Clue\React\Block;
-use React\SocketClient\SecureConnector;
+use React\Socket\SecureConnector;
 
 class FunctionalTest extends AbstractTestCase
 {
