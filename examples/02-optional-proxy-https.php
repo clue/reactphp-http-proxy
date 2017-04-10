@@ -8,11 +8,11 @@
 // network protocol otherwise.
 
 use Clue\React\HttpProxy\ProxyConnector;
-use React\SocketClient\TcpConnector;
-use React\SocketClient\SecureConnector;
-use React\SocketClient\DnsConnector;
+use React\Socket\TcpConnector;
+use React\Socket\SecureConnector;
+use React\Socket\DnsConnector;
 use React\Dns\Resolver\Factory;
-use React\SocketClient\ConnectionInterface;
+use React\Socket\ConnectionInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 

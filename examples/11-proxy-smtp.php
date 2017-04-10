@@ -5,8 +5,8 @@
 // Please note that MANY public proxies do not allow SMTP connections, YMMV.
 
 use Clue\React\HttpProxy\ProxyConnector;
-use React\SocketClient\TcpConnector;
-use React\SocketClient\ConnectionInterface;
+use React\Socket\TcpConnector;
+use React\Socket\ConnectionInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 

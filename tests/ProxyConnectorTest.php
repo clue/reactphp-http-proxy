@@ -4,7 +4,7 @@ namespace Tests\Clue\React\HttpProxy;
 
 use Clue\React\HttpProxy\ProxyConnector;
 use React\Promise\Promise;
-use React\SocketClient\ConnectionInterface;
+use React\Socket\ConnectionInterface;
 
 class ProxyConnectorTest extends AbstractTestCase
 {
@@ -12,7 +12,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function setUp()
     {
-        $this->connector = $this->getMockBuilder('React\SocketClient\ConnectorInterface')->getMock();
+        $this->connector = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
     }
 
     /**
@@ -69,7 +69,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function testWillWriteToOpenConnection()
     {
-        $stream = $this->getMockBuilder('React\SocketClient\StreamConnection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
         $stream->expects($this->once())->method('write');
 
         $promise = \React\Promise\resolve($stream);
@@ -82,7 +82,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function testRejectsAndClosesIfStreamWritesNonHttp()
     {
-        $stream = $this->getMockBuilder('React\SocketClient\StreamConnection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
 
         $promise = \React\Promise\resolve($stream);
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
@@ -99,7 +99,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function testRejectsAndClosesIfStreamWritesTooMuchData()
     {
-        $stream = $this->getMockBuilder('React\SocketClient\StreamConnection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
 
         $promise = \React\Promise\resolve($stream);
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
@@ -116,7 +116,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function testRejectsAndClosesIfStreamReturnsNonSuccess()
     {
-        $stream = $this->getMockBuilder('React\SocketClient\StreamConnection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
 
         $promise = \React\Promise\resolve($stream);
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
@@ -133,7 +133,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function testResolvesIfStreamReturnsSuccess()
     {
-        $stream = $this->getMockBuilder('React\SocketClient\StreamConnection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
 
         $promise = \React\Promise\resolve($stream);
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
@@ -153,7 +153,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function testResolvesIfStreamReturnsSuccessAndEmitsExcessiveData()
     {
-        $stream = $this->getMockBuilder('React\SocketClient\StreamConnection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
 
         $promise = \React\Promise\resolve($stream);
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
@@ -172,7 +172,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
     public function testCancelPromiseWillCloseOpenConnectionAndReject()
     {
-        $stream = $this->getMockBuilder('React\SocketClient\StreamConnection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
         $stream->expects($this->once())->method('close');
 
         $promise = \React\Promise\resolve($stream);

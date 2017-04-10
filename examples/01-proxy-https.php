@@ -4,9 +4,9 @@
 // The proxy can be given as first argument and defaults to localhost:8080 otherwise.
 
 use Clue\React\HttpProxy\ProxyConnector;
-use React\SocketClient\TcpConnector;
-use React\SocketClient\SecureConnector;
-use React\SocketClient\ConnectionInterface;
+use React\Socket\TcpConnector;
+use React\Socket\SecureConnector;
+use React\Socket\ConnectionInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 
