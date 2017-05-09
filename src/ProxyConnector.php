@@ -49,8 +49,8 @@ class ProxyConnector implements ConnectorInterface
      *     port definition. The default port will be `80` for HTTP (or `443` for
      *     HTTPS), but many common HTTP proxy servers use custom ports.
      * @param ConnectorInterface $connector In its most simple form, the given
-     *     connector will be a TcpConnector if you want to connect to a given IP
-     *     address.
+     *     connector will be a \React\Socket\Connector if you want to connect to
+     *     a given IP address.
      * @throws InvalidArgumentException if the proxy URL is invalid
      */
     public function __construct($proxyUrl, ConnectorInterface $connector)
