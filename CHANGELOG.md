@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 (2017-05-10)
+
+* Feature: Forward compatibility with upcoming Socket v1.0 and v0.8
+  (#10 by @clue)
+
 ## 0.3.0 (2017-04-10)
 
 * Feature / BC break: Replace deprecated SocketClient with new Socket component

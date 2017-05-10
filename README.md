@@ -1,6 +1,6 @@
 # clue/http-proxy-react [![Build Status](https://travis-ci.org/clue/php-http-proxy-react.svg?branch=master)](https://travis-ci.org/clue/php-http-proxy-react)
 
-Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP proxy server, built on top of React PHP.
+Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP proxy server, built on top of ReactPHP.
 
 **Table of contents**
 
@@ -174,7 +174,7 @@ The recommended way to install this library is [through Composer](http://getcomp
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/http-proxy-react:^0.3
+$ composer require clue/http-proxy-react:^0.3.1
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
