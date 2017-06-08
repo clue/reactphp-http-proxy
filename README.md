@@ -11,6 +11,8 @@ Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP prox
   * [ProxyConnector](#proxyconnector)
     * [Plain TCP connections](#plain-tcp-connections)
     * [Secure TLS connections](#secure-tls-connections)
+    * [Connection timeout](#connection-timeout)
+    * [DNS resolution](#dns-resolution)
     * [Advanced secure proxy connections](#advanced-secure-proxy-connections)
 * [Install](#install)
 * [Tests](#tests)
@@ -185,6 +187,85 @@ $connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionI
 
 > Also note how secure TLS connections are in fact entirely handled outside of
   this HTTP CONNECT client implementation.
+
+#### Connection timeout
+
+By default, the `ProxyConnector` does not implement any timeouts for establishing remote
+connections.
+Your underlying operating system may impose limits on pending and/or idle TCP/IP
+connections, anywhere in a range of a few minutes to several hours.
+
+Many use cases require more control over the timeout and likely values much
+smaller, usually in the range of a few seconds only.
+
+You can use React's [`Connector`](https://github.com/reactphp/socket#connector)
+or the low-level
+[`TimeoutConnector`](https://github.com/reactphp/socket#timeoutconnector)
+to decorate any given `ConnectorInterface` instance.
+It provides the same `connect()` method, but will automatically reject the
+underlying connection attempt if it takes too long:
+
+```php
+$connector = new Connector($loop, array(
+    'tcp' => $proxy,
+    'dns' => false,
+    'timeout' => 3.0
+));
+
+$connector->connect('tcp://google.com:80')->then(function ($stream) {
+    // connection succeeded within 3.0 seconds
+});
+```
+
+See also any of the [examples](examples).
+
+> Also note how connection timeout is in fact entirely handled outside of this
+  HTTP CONNECT client implementation.
+
+#### DNS resolution
+
+By default, the `ProxyConnector` does not perform any DNS resolution at all and simply
+forwards any hostname you're trying to connect to the remote proxy server.
+The remote proxy server is thus responsible for looking up any hostnames via DNS
+(this default mode is thus called *remote DNS resolution*).
+
+As an alternative, you can also send the destination IP to the remote proxy
+server.
+In this mode you either have to stick to using IPs only (which is ofen unfeasable)
+or perform any DNS lookups locally and only transmit the resolved destination IPs
+(this mode is thus called *local DNS resolution*).
+
+The default *remote DNS resolution* is useful if your local `ProxyConnector` either can
+not resolve target hostnames because it has no direct access to the internet or
+if it should not resolve target hostnames because its outgoing DNS traffic might
+be intercepted.
+
+As noted above, the `ProxyConnector` defaults to using remote DNS resolution.
+However, wrapping the `ProxyConnector` in React's
+[`Connector`](https://github.com/reactphp/socket#connector) actually
+performs local DNS resolution unless explicitly defined otherwise.
+Given that remote DNS resolution is assumed to be the preferred mode, all
+other examples explicitly disable DNS resoltion like this:
+
+```php
+$connector = new Connector($loop, array(
+    'tcp' => $proxy,
+    'dns' => false
+));
+```
+
+If you want to explicitly use *local DNS resolution*, you can use the following code:
+
+```php
+// set up Connector which uses Google's public DNS (8.8.8.8)
+$connector = Connector($loop, array(
+    'tcp' => $proxy,
+    'dns' => '8.8.8.8'
+));
+```
+
+> Also note how local DNS resolution is in fact entirely handled outside of this
+  HTTP CONNECT client implementation.
 
 #### Advanced secure proxy connections
 
