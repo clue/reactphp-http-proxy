@@ -9,6 +9,9 @@ Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP prox
   * [ConnectorInterface](#connectorinterface)
     * [connect()](#connect)
   * [ProxyConnector](#proxyconnector)
+    * [Plain TCP connections](#plain-tcp-connections)
+    * [Secure TLS connections](#secure-tls-connections)
+    * [Advanced secure proxy connections](#advanced-secure-proxy-connections)
 * [Install](#install)
 * [Tests](#tests)
 * [License](#license)
@@ -118,9 +121,14 @@ higher-level component:
 + $client = new SomeClient($proxy);
 ```
 
+#### Plain TCP connections
+
 This is most frequently used to issue HTTPS requests to your destination.
 However, this is actually performed on a higher protocol layer and this
-connector is actually inherently a general-purpose plain TCP/IP connector:
+connector is actually inherently a general-purpose plain TCP/IP connector.
+
+The `ProxyConnector` implements the [`ConnectorInterface`](#connectorinterface) and
+hence provides a single public method, the [`connect()`](#connect) method.
 
 ```php
 $proxy = new ProxyConnector('127.0.0.1:8080', $connector);
@@ -133,8 +141,27 @@ $proxy->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInter
 });
 ```
 
+You can either use the `ProxyConnector` directly or you may want to wrap this connector
+in React's [`Connector`](https://github.com/reactphp/socket#connector):
+
+```php
+$connector = new Connector($loop, array(
+    'tcp' => $proxy,
+    'dns' => false
+));
+
+$connector->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInterface $stream) {
+    $stream->write("EHLO local\r\n");
+    $stream->on('data', function ($chunk) use ($stream) {
+        echo $chunk;
+    });
+});
+```
+
 Note that HTTP CONNECT proxies often restrict which ports one may connect to.
 Many (public) proxy servers do in fact limit this to HTTPS (443) only.
+
+#### Secure TLS connections
 
 If you want to establish a TLS connection (such as HTTPS) between you and
 your destination, you may want to wrap this connector in React's
@@ -155,6 +182,11 @@ $connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionI
     });
 });
 ```
+
+> Also note how secure TLS connections are in fact entirely handled outside of
+  this HTTP CONNECT client implementation.
+
+#### Advanced secure proxy connections
 
 Note that communication between the client and the proxy is usually via an
 unencrypted, plain TCP/IP HTTP connection. Note that this is the most common
