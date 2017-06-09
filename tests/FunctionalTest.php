@@ -44,7 +44,7 @@ class FunctionalTest extends AbstractTestCase
         }
 
         $secure = new SecureConnector($this->dnsConnector, $this->loop);
-        $proxy = new ProxyConnector('google.com:443', $secure);
+        $proxy = new ProxyConnector('https://google.com:443', $secure);
 
         $promise = $proxy->connect('google.com:80');
 

@@ -101,7 +101,7 @@ to the proxy server address:
 
 ```php
 $connector = new Connector($loop);
-$proxy = new ProxyConnector('127.0.0.1:8080', $connector);
+$proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
 ```
 
 The proxy URL may or may not contain a scheme and port definition. The default
@@ -119,7 +119,7 @@ higher-level component:
 
 ```diff
 - $client = new SomeClient($connector);
-+ $proxy = new ProxyConnector('127.0.0.1:8080', $connector);
++ $proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
 + $client = new SomeClient($proxy);
 ```
 
@@ -133,7 +133,7 @@ The `ProxyConnector` implements the [`ConnectorInterface`](#connectorinterface) 
 hence provides a single public method, the [`connect()`](#connect) method.
 
 ```php
-$proxy = new ProxyConnector('127.0.0.1:8080', $connector);
+$proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
 
 $proxy->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInterface $stream) {
     $stream->write("EHLO local\r\n");
@@ -171,7 +171,7 @@ your destination, you may want to wrap this connector in React's
 [`SecureConnector`](https://github.com/reactphp/socket#secureconnector):
 
 ```php
-$proxy = new ProxyConnector('127.0.0.1:8080', $connector);
+$proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
 $connector = new Connector($loop, array(
     'tcp' => $proxy,
     'dns' => false
@@ -274,16 +274,17 @@ unencrypted, plain TCP/IP HTTP connection. Note that this is the most common
 setup, because you can still establish a TLS connection between you and the
 destination host as above.
 
-If you want to connect to a (rather rare) HTTPS proxy, you may want use its
-HTTPS port (443) and use a
+If you want to connect to a (rather rare) HTTPS proxy, you may want use the
+`https://` scheme (HTTPS default port 443) and use React's
+[`Connector`](https://github.com/reactphp/socket#connector) or the low-level
 [`SecureConnector`](https://github.com/reactphp/socket#secureconnector)
 instance to create a secure connection to the proxy:
 
 ```php
-$ssl = new SecureConnector($connector, $loop);
-$proxy = new ProxyConnector('127.0.0.1:443', $ssl);
+$connector = new Connector($loop);
+$proxy = new ProxyConnector('https://127.0.0.1:443', $connector);
 
-$proxy->connect('smtp.googlemail.com:587');
+$proxy->connect('tcp://smtp.googlemail.com:587');
 ```
 
 ## Install
