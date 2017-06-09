@@ -7,6 +7,7 @@ use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use RingCentral\Psr7;
+use React\Promise;
 use React\Promise\Deferred;
 use React\Socket\ConnectionInterface;
 
@@ -60,16 +61,18 @@ class ProxyConnector implements ConnectorInterface
         }
 
         $parts = parse_url($proxyUrl);
-        if (!$parts || !isset($parts['scheme'], $parts['host'])) {
+        if (!$parts || !isset($parts['scheme'], $parts['host']) || ($parts['scheme'] !== 'http' && $parts['scheme'] !== 'https')) {
             throw new InvalidArgumentException('Invalid proxy URL');
         }
 
+        // apply default port and TCP/TLS transport for given scheme
         if (!isset($parts['port'])) {
             $parts['port'] = $parts['scheme'] === 'https' ? 443 : 80;
         }
+        $parts['scheme'] = $parts['scheme'] === 'https' ? 'tls' : 'tcp';
 
         $this->connector = $connector;
-        $this->proxyUri = $parts['host'] . ':' . $parts['port'];
+        $this->proxyUri = $parts['scheme'] . '://' . $parts['host'] . ':' . $parts['port'];
     }
 
     public function connect($uri)

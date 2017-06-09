@@ -23,20 +23,38 @@ class ProxyConnectorTest extends AbstractTestCase
         new ProxyConnector('///', $this->connector);
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testInvalidProxyScheme()
+    {
+        new ProxyConnector('ftp://example.com', $this->connector);
+    }
+
     public function testCreatesConnectionToHttpPort()
     {
         $promise = new Promise(function () { });
-        $this->connector->expects($this->once())->method('connect')->with('proxy.example.com:80?hostname=google.com')->willReturn($promise);
+        $this->connector->expects($this->once())->method('connect')->with('tcp://proxy.example.com:80?hostname=google.com')->willReturn($promise);
 
         $proxy = new ProxyConnector('proxy.example.com', $this->connector);
 
         $proxy->connect('google.com:80');
     }
 
+    public function testCreatesConnectionToHttpPortAndPassesThroughUriComponents()
+    {
+        $promise = new Promise(function () { });
+        $this->connector->expects($this->once())->method('connect')->with('tcp://proxy.example.com:80/path?foo=bar&hostname=google.com#segment')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $proxy->connect('google.com:80/path?foo=bar#segment');
+    }
+
     public function testCreatesConnectionToHttpPortAndObeysExplicitHostname()
     {
         $promise = new Promise(function () { });
-        $this->connector->expects($this->once())->method('connect')->with('proxy.example.com:80?hostname=www.google.com')->willReturn($promise);
+        $this->connector->expects($this->once())->method('connect')->with('tcp://proxy.example.com:80?hostname=www.google.com')->willReturn($promise);
 
         $proxy = new ProxyConnector('proxy.example.com', $this->connector);
 
@@ -46,7 +64,7 @@ class ProxyConnectorTest extends AbstractTestCase
     public function testCreatesConnectionToHttpsPort()
     {
         $promise = new Promise(function () { });
-        $this->connector->expects($this->once())->method('connect')->with('proxy.example.com:443?hostname=google.com')->willReturn($promise);
+        $this->connector->expects($this->once())->method('connect')->with('tls://proxy.example.com:443?hostname=google.com')->willReturn($promise);
 
         $proxy = new ProxyConnector('https://proxy.example.com', $this->connector);
 
@@ -78,6 +96,28 @@ class ProxyConnectorTest extends AbstractTestCase
         $proxy = new ProxyConnector('proxy.example.com', $this->connector);
 
         $proxy->connect('google.com:80');
+    }
+
+    public function testRejectsInvalidUri()
+    {
+        $this->connector->expects($this->never())->method('connect');
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('///');
+
+        $promise->then(null, $this->expectCallableOnce());
+    }
+
+    public function testRejectsUriWithNonTcpScheme()
+    {
+        $this->connector->expects($this->never())->method('connect');
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('tls://google.com:80');
+
+        $promise->then(null, $this->expectCallableOnce());
     }
 
     public function testRejectsAndClosesIfStreamWritesNonHttp()
