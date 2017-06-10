@@ -42,6 +42,7 @@ class ProxyConnector implements ConnectorInterface
 {
     private $connector;
     private $proxyUri;
+    private $proxyAuth = '';
 
     /**
      * Instantiate a new ProxyConnector which uses the given $proxyUrl
@@ -73,6 +74,13 @@ class ProxyConnector implements ConnectorInterface
 
         $this->connector = $connector;
         $this->proxyUri = $parts['scheme'] . '://' . $parts['host'] . ':' . $parts['port'];
+
+        // prepare Proxy-Authorization header if URI contains username/password
+        if (isset($parts['user']) || isset($parts['pass'])) {
+            $this->proxyAuth = 'Proxy-Authorization: Basic ' . base64_encode(
+                rawurldecode($parts['user'] . ':' . (isset($parts['pass']) ? $parts['pass'] : ''))
+            ) . "\r\n";
+        }
     }
 
     public function connect($uri)
@@ -116,7 +124,9 @@ class ProxyConnector implements ConnectorInterface
             $proxyUri .= '#' . $parts['fragment'];
         }
 
-        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($host, $port) {
+        $auth = $this->proxyAuth;
+
+        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($host, $port, $auth) {
             $deferred = new Deferred(function ($_, $reject) use ($stream) {
                 $reject(new RuntimeException('Operation canceled while waiting for response from proxy'));
                 $stream->close();
@@ -176,7 +186,7 @@ class ProxyConnector implements ConnectorInterface
                 $deferred->reject(new RuntimeException('Connection to proxy lost while waiting for response'));
             });
 
-            $stream->write("CONNECT " . $host . ":" . $port . " HTTP/1.1\r\nHost: " . $host . ":" . $port . "\r\n\r\n");
+            $stream->write("CONNECT " . $host . ":" . $port . " HTTP/1.1\r\nHost: " . $host . ":" . $port . "\r\n" . $auth . "\r\n");
 
             return $deferred->promise();
         });
