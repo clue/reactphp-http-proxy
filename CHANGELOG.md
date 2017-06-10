@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0 (2017-06-10)
+
+* First stable release, now following SemVer
+
+> Contains no other changes, so it's actually fully compatible with the v0.3.2 release.
+
 ## 0.3.2 (2017-06-10)
 
 * Fix: Fix rejecting invalid URIs and unexpected URI schemes
