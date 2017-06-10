@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.2 (2017-06-10)
+
+* Fix: Fix rejecting invalid URIs and unexpected URI schemes
+  (#13 by @clue)
+
+* Fix HHVM build for now again and ignore future HHVM build errors
+  (#12 by @clue)
+
+* Documentation for Connector concepts (TCP/TLS, timeouts, DNS resolution)
+  (#11 by @clue)
+
 ## 0.3.1 (2017-05-10)
 
 * Feature: Forward compatibility with upcoming Socket v1.0 and v0.8
