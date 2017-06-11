@@ -13,6 +13,7 @@ Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP prox
     * [Secure TLS connections](#secure-tls-connections)
     * [Connection timeout](#connection-timeout)
     * [DNS resolution](#dns-resolution)
+    * [Authentication](#authentication)
     * [Advanced secure proxy connections](#advanced-secure-proxy-connections)
 * [Install](#install)
 * [Tests](#tests)
@@ -266,6 +267,35 @@ $connector = Connector($loop, array(
 
 > Also note how local DNS resolution is in fact entirely handled outside of this
   HTTP CONNECT client implementation.
+
+#### Authentication
+
+If your HTTP proxy server requires authentication, you may pass the username and
+password as part of the HTTP proxy URL like this:
+
+```php
+$proxy = new ProxyConnector('http://user:pass@127.0.0.1:8080', $connector);
+```
+
+Note that both the username and password must be percent-encoded if they contain
+special characters:
+
+```php
+$user = 'he:llo';
+$pass = 'p@ss';
+
+$proxy = new ProxyConnector(
+    rawurlencode($user) . ':' . rawurlencode($pass) . '@127.0.0.1:8080',
+    $connector
+);
+```
+
+> The authentication details will be used for basic authentication and will be
+  transferred in the `Proxy-Authorization` HTTP request header for each
+  connection attempt.
+  If the authentication details are missing or not accepted by the remote HTTP
+  proxy server, it is expected to reject each connection attempt with a
+  `407` (Proxy Authentication Required) response status code.
 
 #### Advanced secure proxy connections
 

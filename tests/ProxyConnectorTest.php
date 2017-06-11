@@ -88,12 +88,54 @@ class ProxyConnectorTest extends AbstractTestCase
     public function testWillWriteToOpenConnection()
     {
         $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
-        $stream->expects($this->once())->method('write');
+        $stream->expects($this->once())->method('write')->with("CONNECT google.com:80 HTTP/1.1\r\nHost: google.com:80\r\n\r\n");
 
         $promise = \React\Promise\resolve($stream);
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
 
         $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $proxy->connect('google.com:80');
+    }
+
+    public function testWillProxyAuthorizationHeaderIfProxyUriContainsAuthentication()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream->expects($this->once())->method('write')->with("CONNECT google.com:80 HTTP/1.1\r\nHost: google.com:80\r\nProxy-Authorization: Basic dXNlcjpwYXNz\r\n\r\n");
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('user:pass@proxy.example.com', $this->connector);
+
+        $proxy->connect('google.com:80');
+    }
+
+    public function testWillProxyAuthorizationHeaderIfProxyUriContainsOnlyUsernameWithoutPassword()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream->expects($this->once())->method('write')->with("CONNECT google.com:80 HTTP/1.1\r\nHost: google.com:80\r\nProxy-Authorization: Basic dXNlcjo=\r\n\r\n");
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('user@proxy.example.com', $this->connector);
+
+        $proxy->connect('google.com:80');
+    }
+
+    public function testWillProxyAuthorizationHeaderIfProxyUriContainsAuthenticationWithPercentEncoding()
+    {
+        $user = 'h@llÖ';
+        $pass = '%secret?';
+
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream->expects($this->once())->method('write')->with("CONNECT google.com:80 HTTP/1.1\r\nHost: google.com:80\r\nProxy-Authorization: Basic " . base64_encode($user . ':' . $pass) . "\r\n\r\n");
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector(rawurlencode($user) . ':' . rawurlencode($pass) . '@proxy.example.com', $this->connector);
 
         $proxy->connect('google.com:80');
     }
