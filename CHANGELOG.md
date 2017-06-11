@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.0 (2017-06-11)
+
+* Feature: Support proxy authentication if proxy URL contains username/password
+  (#14 by @clue)
+
+  ```php
+  // new: username/password will now be passed to HTTP proxy server
+  $proxy = new ProxyConnector('user:pass@127.0.0.1:8080');
+  ```
+
 ## 1.0.0 (2017-06-10)
 
 * First stable release, now following SemVer
