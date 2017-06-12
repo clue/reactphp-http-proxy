@@ -44,6 +44,8 @@ class ProxyConnector implements ConnectorInterface
     private $connector;
     private $proxyUri;
     private $proxyAuth = '';
+    /** @var array */
+    private $proxyHeaders;
 
     /**
      * Instantiate a new ProxyConnector which uses the given $proxyUrl
@@ -54,9 +56,10 @@ class ProxyConnector implements ConnectorInterface
      * @param ConnectorInterface $connector In its most simple form, the given
      *     connector will be a \React\Socket\Connector if you want to connect to
      *     a given IP address.
+     * @param array $httpHeaders Custom HTTP headers to be sent to the proxy.
      * @throws InvalidArgumentException if the proxy URL is invalid
      */
-    public function __construct($proxyUrl, ConnectorInterface $connector)
+    public function __construct($proxyUrl, ConnectorInterface $connector, array $httpHeaders = array())
     {
         // support `http+unix://` scheme for Unix domain socket (UDS) paths
         if (preg_match('/^http\+unix:\/\/(.*?@)?(.+?)$/', $proxyUrl, $match)) {
@@ -90,10 +93,12 @@ class ProxyConnector implements ConnectorInterface
 
         // prepare Proxy-Authorization header if URI contains username/password
         if (isset($parts['user']) || isset($parts['pass'])) {
-            $this->proxyAuth = 'Proxy-Authorization: Basic ' . base64_encode(
+            $this->proxyAuth = 'Basic ' . base64_encode(
                 rawurldecode($parts['user'] . ':' . (isset($parts['pass']) ? $parts['pass'] : ''))
-            ) . "\r\n";
+            );
         }
+
+        $this->proxyHeaders = $httpHeaders;
     }
 
     public function connect($uri)
@@ -138,8 +143,9 @@ class ProxyConnector implements ConnectorInterface
         }
 
         $auth = $this->proxyAuth;
+        $headers = $this->proxyHeaders;
 
-        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($host, $port, $auth) {
+        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($host, $port, $auth, $headers) {
             $deferred = new Deferred(function ($_, $reject) use ($stream) {
                 $reject(new RuntimeException('Connection canceled while waiting for response from proxy (ECONNABORTED)', defined('SOCKET_ECONNABORTED') ? SOCKET_ECONNABORTED : 103));
                 $stream->close();
@@ -199,7 +205,14 @@ class ProxyConnector implements ConnectorInterface
                 $deferred->reject(new RuntimeException('Connection to proxy lost while waiting for response (ECONNRESET)', defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104));
             });
 
-            $stream->write("CONNECT " . $host . ":" . $port . " HTTP/1.1\r\nHost: " . $host . ":" . $port . "\r\n" . $auth . "\r\n");
+            $hostAndPort = sprintf('%s:%d', $host, $port);
+            $headers['Host'] = $hostAndPort;
+            if ($auth !== '') {
+                $headers['Proxy-Authorization'] = $auth;
+            }
+            $request = new Psr7\Request('CONNECT', $hostAndPort, $headers);
+            $request = $request->withRequestTarget($hostAndPort);
+            $stream->write(Psr7\str($request));
 
             return $deferred->promise()->then(function (ConnectionInterface $stream) use ($fn) {
                 // Stop buffering when connection has been established.

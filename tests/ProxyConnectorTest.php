@@ -171,6 +171,36 @@ class ProxyConnectorTest extends AbstractTestCase
         $proxy->connect('google.com:80');
     }
 
+    public function testWillSendCustomHttpHeadersToProxy()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream->expects($this->once())->method('write')->with("CONNECT google.com:80 HTTP/1.1\r\nX-Custom-Header: X-Custom-Value\r\nHost: google.com:80\r\n\r\n");
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector, array(
+            'X-Custom-Header' => 'X-Custom-Value',
+        ));
+
+        $proxy->connect('google.com:80');
+    }
+
+    public function testWillOverrideProxyAuthorizationHeaderWithCredentialsFromUri()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream->expects($this->once())->method('write')->with("CONNECT google.com:80 HTTP/1.1\r\nProxy-Authorization: Basic dXNlcjpwYXNz\r\nHost: google.com:80\r\n\r\n");
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('user:pass@proxy.example.com', $this->connector, array(
+            'Proxy-Authorization' => 'foobar',
+        ));
+
+        $proxy->connect('google.com:80');
+    }
+
     public function testRejectsInvalidUri()
     {
         $this->connector->expects($this->never())->method('connect');
