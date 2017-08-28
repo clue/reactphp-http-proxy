@@ -189,6 +189,8 @@ class ProxyConnector implements ConnectorInterface
             $stream->write("CONNECT " . $host . ":" . $port . " HTTP/1.1\r\nHost: " . $host . ":" . $port . "\r\n" . $auth . "\r\n");
 
             return $deferred->promise();
+        }, function (Exception $e) use ($proxyUri) {
+            throw new RuntimeException('Unable to connect to proxy (ECONNREFUSED)', defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111, $e);
         });
     }
 }

@@ -162,6 +162,18 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnce());
     }
 
+    public function testRejectsIfConnectorRejects()
+    {
+        $promise = \React\Promise\reject(new \RuntimeException());
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+
+        $promise->then(null, $this->expectCallableOnce());
+    }
+
     public function testRejectsAndClosesIfStreamWritesNonHttp()
     {
         $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
