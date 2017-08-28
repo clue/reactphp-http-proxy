@@ -295,7 +295,8 @@ $proxy = new ProxyConnector(
   connection attempt.
   If the authentication details are missing or not accepted by the remote HTTP
   proxy server, it is expected to reject each connection attempt with a
-  `407` (Proxy Authentication Required) response status code.
+  `407` (Proxy Authentication Required) response status code and an exception
+  error code of `SOCKET_EACCES` (13).
 
 #### Advanced secure proxy connections
 

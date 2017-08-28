@@ -151,11 +151,14 @@ class ProxyConnector implements ConnectorInterface
                         return;
                     }
 
-                    // status must be 2xx
-                    if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+                    if ($response->getStatusCode() === 407) {
+                        // map status code 407 (Proxy Authentication Required) to EACCES
+                        $deferred->reject(new RuntimeException('Proxy denied connection due to invalid authentication ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (EACCES)', defined('SOCKET_EACCES') ? SOCKET_EACCES : 13));
+                        return $stream->close();
+                    } elseif ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+                        // map non-2xx status code to ECONNREFUSED
                         $deferred->reject(new RuntimeException('Proxy refused connection with HTTP error code ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (ECONNREFUSED)', defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111));
-                        $stream->close();
-                        return;
+                        return $stream->close();
                     }
 
                     // all okay, resolve with stream instance

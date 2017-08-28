@@ -208,6 +208,23 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EMSGSIZE));
     }
 
+    public function testRejectsAndClosesIfStreamReturnsProyAuthenticationRequired()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+
+        $stream->expects($this->once())->method('close');
+        $stream->emit('data', array("HTTP/1.1 407 Proxy Authentication Required\r\n\r\n"));
+
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EACCES));
+    }
+
     public function testRejectsAndClosesIfStreamReturnsNonSuccess()
     {
         $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
