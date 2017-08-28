@@ -9,6 +9,7 @@ use React\Socket\DnsConnector;
 use Clue\React\Block;
 use React\Socket\SecureConnector;
 
+/** @group internet */
 class FunctionalTest extends AbstractTestCase
 {
     private $loop;
