@@ -128,7 +128,7 @@ class ProxyConnector implements ConnectorInterface
 
         return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($host, $port, $auth) {
             $deferred = new Deferred(function ($_, $reject) use ($stream) {
-                $reject(new RuntimeException('Operation canceled while waiting for response from proxy'));
+                $reject(new RuntimeException('Connection canceled while waiting for response from proxy (ECONNABORTED)', defined('SOCKET_ECONNABORTED') ? SOCKET_ECONNABORTED : 103));
                 $stream->close();
             });
 
@@ -146,14 +146,14 @@ class ProxyConnector implements ConnectorInterface
                     try {
                         $response = Psr7\parse_response(substr($buffer, 0, $pos));
                     } catch (Exception $e) {
-                        $deferred->reject(new RuntimeException('Invalid response received from proxy: ' . $e->getMessage(), 0, $e));
+                        $deferred->reject(new RuntimeException('Invalid response received from proxy (EBADMSG)', defined('SOCKET_EBADMSG') ? SOCKET_EBADMSG: 71, $e));
                         $stream->close();
                         return;
                     }
 
                     // status must be 2xx
                     if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-                        $deferred->reject(new RuntimeException('Proxy rejected with HTTP error code: ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase(), $response->getStatusCode()));
+                        $deferred->reject(new RuntimeException('Proxy refused connection with HTTP error code ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (ECONNREFUSED)', defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111));
                         $stream->close();
                         return;
                     }
@@ -172,18 +172,18 @@ class ProxyConnector implements ConnectorInterface
 
                 // stop buffering when 8 KiB have been read
                 if (isset($buffer[8192])) {
-                    $deferred->reject(new RuntimeException('Proxy must not send more than 8 KiB of headers'));
+                    $deferred->reject(new RuntimeException('Proxy must not send more than 8 KiB of headers (EMSGSIZE)', defined('SOCKET_EMSGSIZE') ? SOCKET_EMSGSIZE : 90));
                     $stream->close();
                 }
             };
             $stream->on('data', $fn);
 
             $stream->on('error', function (Exception $e) use ($deferred) {
-                $deferred->reject(new RuntimeException('Stream error while waiting for response from proxy', 0, $e));
+                $deferred->reject(new RuntimeException('Stream error while waiting for response from proxy (EIO)', defined('SOCKET_EIO') ? SOCKET_EIO : 5, $e));
             });
 
             $stream->on('close', function () use ($deferred) {
-                $deferred->reject(new RuntimeException('Connection to proxy lost while waiting for response'));
+                $deferred->reject(new RuntimeException('Connection to proxy lost while waiting for response (ECONNRESET)', defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104));
             });
 
             $stream->write("CONNECT " . $host . ":" . $port . " HTTP/1.1\r\nHost: " . $host . ":" . $port . "\r\n" . $auth . "\r\n");

@@ -188,7 +188,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array("invalid\r\n\r\n"));
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EBADMSG));
     }
 
     public function testRejectsAndClosesIfStreamWritesTooMuchData()
@@ -205,7 +205,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array(str_repeat('*', 100000)));
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EMSGSIZE));
     }
 
     public function testRejectsAndClosesIfStreamReturnsNonSuccess()
@@ -222,7 +222,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array("HTTP/1.1 403 Not allowed\r\n\r\n"));
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_ECONNREFUSED));
     }
 
     public function testResolvesIfStreamReturnsSuccess()
@@ -280,6 +280,6 @@ class ProxyConnectorTest extends AbstractTestCase
 
         $promise->cancel();
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_ECONNABORTED));
     }
 }
