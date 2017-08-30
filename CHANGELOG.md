@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.0 (2017-08-30)
+
+*   Feature: Use socket error codes for connection rejections
+    (#17 by @clue)
+
+    ```php
+    $promise = $proxy->connect('imap.example.com:143');
+    $promise->then(null, function (Exeption $e) {
+        if ($e->getCode() === SOCKET_EACCES) {
+            echo 'Failed to authenticate with proxy!';
+        }
+        throw $e;
+    });
+    ```
+
+*   Improve test suite by locking Travis distro so new defaults will not break the build and
+    optionally exclude tests that rely on working internet connection
+    (#15 and #16 by @clue)
+
 ## 1.1.0 (2017-06-11)
 
 * Feature: Support proxy authentication if proxy URL contains username/password
