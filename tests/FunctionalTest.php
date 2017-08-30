@@ -28,13 +28,23 @@ class FunctionalTest extends AbstractTestCase
         $this->dnsConnector = new DnsConnector($this->tcpConnector, $resolver);
     }
 
+    public function testNonListeningSocketRejectsConnection()
+    {
+        $proxy = new ProxyConnector('127.0.0.1:9999', $this->dnsConnector);
+
+        $promise = $proxy->connect('google.com:80');
+
+        $this->setExpectedException('RuntimeException', 'Unable to connect to proxy', SOCKET_ECONNREFUSED);
+        Block\await($promise, $this->loop, 3.0);
+    }
+
     public function testPlainGoogleDoesNotAcceptConnectMethod()
     {
         $proxy = new ProxyConnector('google.com', $this->dnsConnector);
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->setExpectedException('RuntimeException', 'Method Not Allowed', 405);
+        $this->setExpectedException('RuntimeException', '405 (Method Not Allowed)', SOCKET_ECONNREFUSED);
         Block\await($promise, $this->loop, 3.0);
     }
 
@@ -49,7 +59,7 @@ class FunctionalTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->setExpectedException('RuntimeException', 'Method Not Allowed', 405);
+        $this->setExpectedException('RuntimeException', '405 (Method Not Allowed)', SOCKET_ECONNREFUSED);
         Block\await($promise, $this->loop, 3.0);
     }
 
@@ -59,7 +69,7 @@ class FunctionalTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->setExpectedException('RuntimeException', 'Connection to proxy lost');
+        $this->setExpectedException('RuntimeException', 'Connection to proxy lost', SOCKET_ECONNRESET);
         Block\await($promise, $this->loop, 3.0);
     }
 }

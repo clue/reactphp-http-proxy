@@ -162,6 +162,18 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnce());
     }
 
+    public function testRejectsIfConnectorRejects()
+    {
+        $promise = \React\Promise\reject(new \RuntimeException());
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+
+        $promise->then(null, $this->expectCallableOnce());
+    }
+
     public function testRejectsAndClosesIfStreamWritesNonHttp()
     {
         $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
@@ -176,7 +188,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array("invalid\r\n\r\n"));
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EBADMSG));
     }
 
     public function testRejectsAndClosesIfStreamWritesTooMuchData()
@@ -193,7 +205,24 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array(str_repeat('*', 100000)));
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EMSGSIZE));
+    }
+
+    public function testRejectsAndClosesIfStreamReturnsProyAuthenticationRequired()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+
+        $stream->expects($this->once())->method('close');
+        $stream->emit('data', array("HTTP/1.1 407 Proxy Authentication Required\r\n\r\n"));
+
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EACCES));
     }
 
     public function testRejectsAndClosesIfStreamReturnsNonSuccess()
@@ -210,7 +239,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array("HTTP/1.1 403 Not allowed\r\n\r\n"));
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_ECONNREFUSED));
     }
 
     public function testResolvesIfStreamReturnsSuccess()
@@ -268,6 +297,6 @@ class ProxyConnectorTest extends AbstractTestCase
 
         $promise->cancel();
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_ECONNABORTED));
     }
 }
