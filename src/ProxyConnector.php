@@ -134,14 +134,11 @@ class ProxyConnector implements ConnectorInterface
 
             // keep buffering data until headers are complete
             $buffer = '';
-            $fn = function ($chunk) use (&$buffer, &$fn, $deferred, $stream) {
+            $fn = function ($chunk) use (&$buffer, $deferred, $stream) {
                 $buffer .= $chunk;
 
                 $pos = strpos($buffer, "\r\n\r\n");
                 if ($pos !== false) {
-                    // end of headers received => stop buffering
-                    $stream->removeListener('data', $fn);
-
                     // try to parse headers as response message
                     try {
                         $response = Psr7\parse_response(substr($buffer, 0, $pos));
@@ -191,7 +188,11 @@ class ProxyConnector implements ConnectorInterface
 
             $stream->write("CONNECT " . $host . ":" . $port . " HTTP/1.1\r\nHost: " . $host . ":" . $port . "\r\n" . $auth . "\r\n");
 
-            return $deferred->promise();
+            return $deferred->promise()->then(function (ConnectionInterface $stream) use ($fn) {
+                // Stop buffering when connection has been established.
+                $stream->removeListener('data', $fn);
+                return new Promise\FulfilledPromise($stream);
+            });
         }, function (Exception $e) use ($proxyUri) {
             throw new RuntimeException('Unable to connect to proxy (ECONNREFUSED)', defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111, $e);
         });
