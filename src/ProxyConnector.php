@@ -2,7 +2,6 @@
 
 namespace Clue\React\HttpProxy;
 
-use React\Socket\ConnectorInterface;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
@@ -10,6 +9,8 @@ use RingCentral\Psr7;
 use React\Promise;
 use React\Promise\Deferred;
 use React\Socket\ConnectionInterface;
+use React\Socket\ConnectorInterface;
+use React\Socket\FixedUriConnector;
 
 /**
  * A simple Connector that uses an HTTP CONNECT proxy to create plain TCP/IP connections to any destination
@@ -57,13 +58,25 @@ class ProxyConnector implements ConnectorInterface
      */
     public function __construct($proxyUrl, ConnectorInterface $connector)
     {
+        // support `http+unix://` scheme for Unix domain socket (UDS) paths
+        if (preg_match('/^http\+unix:\/\/(.*?@)?(.+?)$/', $proxyUrl, $match)) {
+            // rewrite URI to parse authentication from dummy host
+            $proxyUrl = 'http://' . $match[1] . 'localhost';
+
+            // connector uses Unix transport scheme and explicit path given
+            $connector = new FixedUriConnector(
+                'unix://' . $match[2],
+                $connector
+            );
+        }
+
         if (strpos($proxyUrl, '://') === false) {
             $proxyUrl = 'http://' . $proxyUrl;
         }
 
         $parts = parse_url($proxyUrl);
         if (!$parts || !isset($parts['scheme'], $parts['host']) || ($parts['scheme'] !== 'http' && $parts['scheme'] !== 'https')) {
-            throw new InvalidArgumentException('Invalid proxy URL');
+            throw new InvalidArgumentException('Invalid proxy URL "' . $proxyUrl . '"');
         }
 
         // apply default port and TCP/TLS transport for given scheme

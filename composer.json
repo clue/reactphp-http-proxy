@@ -18,8 +18,8 @@
     },
     "require": {
         "php": ">=5.3",
-        "react/socket": "^1.0 || ^0.8 || ^0.7.1",
         "react/promise": " ^2.1 || ^1.2.1",
+        "react/socket": "^1.0 || ^0.8.4",
         "ringcentral/psr7": "^1.2"
     },
     "require-dev": {
