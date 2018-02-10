@@ -1,6 +1,6 @@
 {
     "name": "clue/http-proxy-react",
-    "description": "Async HTTP CONNECT proxy connector, use any TCP/IP protocol through an HTTP proxy server, built on top of ReactPHP",
+    "description": "Async HTTP proxy connector, use any TCP/IP protocol through an HTTP CONNECT proxy server, built on top of ReactPHP",
     "keywords": ["HTTP", "CONNECT", "proxy", "ReactPHP", "async"],
     "homepage": "https://github.com/clue/php-http-proxy-react",
     "license": "MIT",
