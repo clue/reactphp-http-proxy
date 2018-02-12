@@ -14,6 +14,7 @@ built on top of [ReactPHP](https://reactphp.org).
     * [DNS resolution](#dns-resolution)
     * [Authentication](#authentication)
     * [Advanced secure proxy connections](#advanced-secure-proxy-connections)
+    * [Advanced Unix domain sockets](#advanced-unix-domain-sockets)
 * [Install](#install)
 * [Tests](#tests)
 * [License](#license)
@@ -286,6 +287,42 @@ $proxy = new ProxyConnector('https://127.0.0.1:443', $connector);
 
 $proxy->connect('tcp://smtp.googlemail.com:587');
 ```
+
+#### Advanced Unix domain sockets
+
+HTTP CONNECT proxy servers support forwarding TCP/IP based connections and
+higher level protocols.
+In some advanced cases, it may be useful to let your HTTP CONNECT proxy server
+listen on a Unix domain socket (UDS) path instead of a IP:port combination.
+For example, this allows you to rely on file system permissions instead of
+having to rely on explicit [authentication](#authentication).
+
+You can simply use the `http+unix://` URI scheme like this:
+
+```php
+$proxy = new ProxyConnector('http+unix:///tmp/proxy.sock', $connector);
+
+$proxy->connect('tcp://google.com:80')->then(function (ConnectionInterface $stream) {
+    // connected…
+});
+```
+
+Similarly, you can also combine this with [authentication](#authentication)
+like this:
+
+```php
+$proxy = new ProxyConnector('http+unix://user:pass@/tmp/proxy.sock', $connector);
+```
+
+> Note that Unix domain sockets (UDS) are considered advanced usage and PHP only
+  has limited support for this.
+  In particular, enabling [secure TLS](#secure-tls-connections) may not be
+  supported.
+
+> Note that the HTTP CONNECT protocol does not support the notion of UDS paths.
+  The above works reasonably well because UDS is only used for the connection between
+  client and proxy server and the path will not actually passed over the protocol.
+  This implies that this does not support connecting to UDS destination paths.
 
 ## Install
 

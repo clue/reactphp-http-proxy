@@ -31,6 +31,14 @@ class ProxyConnectorTest extends AbstractTestCase
         new ProxyConnector('ftp://example.com', $this->connector);
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testInvalidHttpsUnixScheme()
+    {
+        new ProxyConnector('https+unix:///tmp/proxy.sock', $this->connector);
+    }
+
     public function testCreatesConnectionToHttpPort()
     {
         $promise = new Promise(function () { });
@@ -67,6 +75,16 @@ class ProxyConnectorTest extends AbstractTestCase
         $this->connector->expects($this->once())->method('connect')->with('tls://proxy.example.com:443?hostname=google.com')->willReturn($promise);
 
         $proxy = new ProxyConnector('https://proxy.example.com', $this->connector);
+
+        $proxy->connect('google.com:80');
+    }
+
+    public function testCreatesConnectionToUnixPath()
+    {
+        $promise = new Promise(function () { });
+        $this->connector->expects($this->once())->method('connect')->with('unix:///tmp/proxy.sock')->willReturn($promise);
+
+        $proxy = new ProxyConnector('http+unix:///tmp/proxy.sock', $this->connector);
 
         $proxy->connect('google.com:80');
     }
@@ -136,6 +154,19 @@ class ProxyConnectorTest extends AbstractTestCase
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
 
         $proxy = new ProxyConnector(rawurlencode($user) . ':' . rawurlencode($pass) . '@proxy.example.com', $this->connector);
+
+        $proxy->connect('google.com:80');
+    }
+
+    public function testWillProxyAuthorizationHeaderIfUnixProxyUriContainsAuthentication()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream->expects($this->once())->method('write')->with("CONNECT google.com:80 HTTP/1.1\r\nHost: google.com:80\r\nProxy-Authorization: Basic dXNlcjpwYXNz\r\n\r\n");
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->with('unix:///tmp/proxy.sock')->willReturn($promise);
+
+        $proxy = new ProxyConnector('http+unix://user:pass@/tmp/proxy.sock', $this->connector);
 
         $proxy->connect('google.com:80');
     }
