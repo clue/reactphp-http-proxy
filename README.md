@@ -1,7 +1,36 @@
 # clue/http-proxy-react [![Build Status](https://travis-ci.org/clue/php-http-proxy-react.svg?branch=master)](https://travis-ci.org/clue/php-http-proxy-react)
 
-Async HTTP proxy connector, use any TCP/IP protocol through an HTTP CONNECT proxy server,
-built on top of [ReactPHP](https://reactphp.org).
+Async HTTP proxy connector, use any TCP/IP-based protocol through an HTTP
+CONNECT proxy server, built on top of [ReactPHP](https://reactphp.org).
+
+HTTP CONNECT proxy servers (also commonly known as "HTTPS proxy" or "SSL proxy")
+are commonly used to tunnel HTTPS traffic through an intermediary ("proxy"), to
+conceal the origin address (anonymity) or to circumvent address blocking
+(geoblocking). While many (public) HTTP CONNECT proxy servers often limit this
+to HTTPS port `443` only, this can technically be used to tunnel any
+TCP/IP-based protocol (HTTP, SMTP, IMAP etc.).
+This library provides a simple API to create these tunneled connection for you.
+Because it implements ReactPHP's standard
+[`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface),
+it can simply be used in place of a normal connector.
+This makes it fairly simple to add HTTP CONNECT proxy support to pretty much any
+existing higher-level protocol implementation.
+
+* **Async execution of connections** -
+  Send any number of HTTP CONNECT requests in parallel and process their
+  responses as soon as results come in.
+  The Promise-based design provides a *sane* interface to working with out of
+  bound responses and possible connection errors.
+* **Standard interfaces** -
+  Allows easy integration with existing higher-level components by implementing
+  ReactPHP's standard
+  [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface).
+* **Lightweight, SOLID design** -
+  Provides a thin abstraction that is [*just good enough*](http://en.wikipedia.org/wiki/Principle_of_good_enough)
+  and does not get in your way.
+  Builds on top of well-tested components and well-established concepts instead of reinventing the wheel.
+* **Good test coverage** -
+  Comes with an automated tests suite and is regularly tested against actual proxy servers in the wild
 
 **Table of contents**
 
@@ -329,13 +358,19 @@ $proxy = new ProxyConnector('http+unix://user:pass@/tmp/proxy.sock', $connector)
 The recommended way to install this library is [through Composer](https://getcomposer.org).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
+This project follows [SemVer](http://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/http-proxy-react:^1.2
+$ composer require clue/http-proxy-react:^1.3
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
+
+This project aims to run on any platform and thus does not require any PHP
+extensions and supports running on legacy PHP 5.3 through current PHP 7+ and
+HHVM.
+It's *highly recommended to use PHP 7+* for this project.
 
 ## Tests
 

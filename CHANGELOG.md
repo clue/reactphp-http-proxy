@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.3.0 (2018-02-13)
+
+*   Feature: Support communication over Unix domain sockets (UDS)
+    (#20 by @clue)
+
+    ```php
+    // new: now supports communication over Unix domain sockets (UDS)
+    $proxy = new ProxyConnector('http+unix:///tmp/proxy.sock', $connector);
+    ```
+
+*   Reduce memory consumption by avoiding circular reference from stream reader
+    (#18 by @valga)
+
+*   Improve documentation
+    (#19 by @clue)
+
 ## 1.2.0 (2017-08-30)
 
 *   Feature: Use socket error codes for connection rejections
@@ -26,7 +42,7 @@
 
   ```php
   // new: username/password will now be passed to HTTP proxy server
-  $proxy = new ProxyConnector('user:pass@127.0.0.1:8080');
+  $proxy = new ProxyConnector('user:pass@127.0.0.1:8080', $connector);
   ```
 
 ## 1.0.0 (2017-06-10)
