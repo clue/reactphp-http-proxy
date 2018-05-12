@@ -1,4 +1,4 @@
-# clue/http-proxy-react [![Build Status](https://travis-ci.org/clue/php-http-proxy-react.svg?branch=master)](https://travis-ci.org/clue/php-http-proxy-react)
+# clue/reactphp-http-proxy [![Build Status](https://travis-ci.org/clue/reactphp-http-proxy.svg?branch=master)](https://travis-ci.org/clue/reactphp-http-proxy)
 
 Async HTTP proxy connector, use any TCP/IP-based protocol through an HTTP
 CONNECT proxy server, built on top of [ReactPHP](https://reactphp.org).
@@ -409,13 +409,13 @@ MIT
   [react/stream](https://github.com/reactphp/stream) component.
 * As an alternative to an HTTP CONNECT proxy, you may also want to look into
   using a SOCKS (SOCKS4/SOCKS5) proxy instead.
-  You may want to use [clue/socks-react](https://github.com/clue/php-socks-react)
+  You may want to use [clue/reactphp-socks](https://github.com/clue/reactphp-socks)
   which also provides an implementation of the same
   [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface)
   so that supporting either proxy protocol should be fairly trivial.
 * If you're dealing with public proxies, you'll likely have to work with mixed
   quality and unreliable proxies. You may want to look into using
-  [clue/connection-manager-extra](https://github.com/clue/php-connection-manager-extra)
+  [clue/reactphp-connection-manager-extra](https://github.com/clue/reactphp-connection-manager-extra)
   which allows retrying unreliable ones, implying connection timeouts,
   concurrently working with multiple connectors and more.
 * If you're looking for an end-user HTTP CONNECT proxy server daemon, you may
