@@ -107,8 +107,7 @@ class ProxyConnector implements ConnectorInterface
             return Promise\reject(new InvalidArgumentException('Invalid target URI specified'));
         }
 
-        $host = trim($parts['host'], '[]');
-        $port = $parts['port'];
+        $target = $parts['host'] . ':' . $parts['port'];
 
         // construct URI to HTTP CONNECT proxy server to connect to
         $proxyUri = $this->proxyUri;
@@ -126,11 +125,11 @@ class ProxyConnector implements ConnectorInterface
 
         // append hostname from URI to query string unless explicitly given
         if (!isset($args['hostname'])) {
-            $args['hostname'] = $parts['host'];
+            $args['hostname'] = trim($parts['host'], '[]');
         }
 
         // append query string
-        $proxyUri .= '?' . http_build_query($args, '', '&');;
+        $proxyUri .= '?' . http_build_query($args, '', '&');
 
         // append fragment from URI if given
         if (isset($parts['fragment'])) {
@@ -139,7 +138,7 @@ class ProxyConnector implements ConnectorInterface
 
         $auth = $this->proxyAuth;
 
-        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($host, $port, $auth) {
+        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($target, $auth) {
             $deferred = new Deferred(function ($_, $reject) use ($stream) {
                 $reject(new RuntimeException('Connection canceled while waiting for response from proxy (ECONNABORTED)', defined('SOCKET_ECONNABORTED') ? SOCKET_ECONNABORTED : 103));
                 $stream->close();
@@ -199,7 +198,7 @@ class ProxyConnector implements ConnectorInterface
                 $deferred->reject(new RuntimeException('Connection to proxy lost while waiting for response (ECONNRESET)', defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104));
             });
 
-            $stream->write("CONNECT " . $host . ":" . $port . " HTTP/1.1\r\nHost: " . $host . ":" . $port . "\r\n" . $auth . "\r\n");
+            $stream->write("CONNECT " . $target . " HTTP/1.1\r\nHost: " . $target . "\r\n" . $auth . "\r\n");
 
             return $deferred->promise()->then(function (ConnectionInterface $stream) use ($fn) {
                 // Stop buffering when connection has been established.
