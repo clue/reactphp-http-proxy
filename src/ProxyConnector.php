@@ -136,21 +136,34 @@ class ProxyConnector implements ConnectorInterface
             $proxyUri .= '#' . $parts['fragment'];
         }
 
-        $auth = $this->proxyAuth;
+        $connecting = $this->connector->connect($proxyUri);
 
-        return $this->connector->connect($proxyUri)->then(function (ConnectionInterface $stream) use ($target, $auth) {
-            $deferred = new Deferred(function ($_, $reject) use ($stream) {
-                $reject(new RuntimeException('Connection canceled while waiting for response from proxy (ECONNABORTED)', defined('SOCKET_ECONNABORTED') ? SOCKET_ECONNABORTED : 103));
+        $deferred = new Deferred(function ($_, $reject) use ($connecting) {
+            $reject(new RuntimeException(
+                'Connection cancelled while waiting for proxy (ECONNABORTED)',
+                defined('SOCKET_ECONNABORTED') ? SOCKET_ECONNABORTED : 103
+            ));
+
+            // either close active connection or cancel pending connection attempt
+            $connecting->then(function (ConnectionInterface $stream) {
                 $stream->close();
             });
+            $connecting->cancel();
+        });
 
+        $auth = $this->proxyAuth;
+        $connecting->then(function (ConnectionInterface $stream) use ($target, $auth, $deferred) {
             // keep buffering data until headers are complete
             $buffer = '';
-            $fn = function ($chunk) use (&$buffer, $deferred, $stream) {
+            $stream->on('data', $fn = function ($chunk) use (&$buffer, $deferred, $stream, &$fn) {
                 $buffer .= $chunk;
 
                 $pos = strpos($buffer, "\r\n\r\n");
                 if ($pos !== false) {
+                    // end of headers received => stop buffering
+                    $stream->removeListener('data', $fn);
+                    $fn = null;
+
                     // try to parse headers as response message
                     try {
                         $response = Psr7\parse_response(substr($buffer, 0, $pos));
@@ -163,11 +176,13 @@ class ProxyConnector implements ConnectorInterface
                     if ($response->getStatusCode() === 407) {
                         // map status code 407 (Proxy Authentication Required) to EACCES
                         $deferred->reject(new RuntimeException('Proxy denied connection due to invalid authentication ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (EACCES)', defined('SOCKET_EACCES') ? SOCKET_EACCES : 13));
-                        return $stream->close();
+                        $stream->close();
+                        return;
                     } elseif ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
                         // map non-2xx status code to ECONNREFUSED
                         $deferred->reject(new RuntimeException('Proxy refused connection with HTTP error code ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (ECONNREFUSED)', defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111));
-                        return $stream->close();
+                        $stream->close();
+                        return;
                     }
 
                     // all okay, resolve with stream instance
@@ -187,8 +202,7 @@ class ProxyConnector implements ConnectorInterface
                     $deferred->reject(new RuntimeException('Proxy must not send more than 8 KiB of headers (EMSGSIZE)', defined('SOCKET_EMSGSIZE') ? SOCKET_EMSGSIZE : 90));
                     $stream->close();
                 }
-            };
-            $stream->on('data', $fn);
+            });
 
             $stream->on('error', function (Exception $e) use ($deferred) {
                 $deferred->reject(new RuntimeException('Stream error while waiting for response from proxy (EIO)', defined('SOCKET_EIO') ? SOCKET_EIO : 5, $e));
@@ -199,14 +213,28 @@ class ProxyConnector implements ConnectorInterface
             });
 
             $stream->write("CONNECT " . $target . " HTTP/1.1\r\nHost: " . $target . "\r\n" . $auth . "\r\n");
+        }, function (Exception $e) use ($deferred) {
+            $deferred->reject($e = new RuntimeException(
+                'Unable to connect to proxy (ECONNREFUSED)',
+                defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111,
+                $e
+            ));
 
-            return $deferred->promise()->then(function (ConnectionInterface $stream) use ($fn) {
-                // Stop buffering when connection has been established.
-                $stream->removeListener('data', $fn);
-                return new Promise\FulfilledPromise($stream);
-            });
-        }, function (Exception $e) use ($proxyUri) {
-            throw new RuntimeException('Unable to connect to proxy (ECONNREFUSED)', defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111, $e);
+            // avoid garbage references by replacing all closures in call stack.
+            // what a lovely piece of code!
+            $r = new \ReflectionProperty('Exception', 'trace');
+            $r->setAccessible(true);
+            $trace = $r->getValue($e);
+            foreach ($trace as &$one) {
+                foreach ($one['args'] as &$arg) {
+                    if ($arg instanceof \Closure) {
+                        $arg = 'Object(' . get_class($arg) . ')';
+                    }
+                }
+            }
+            $r->setValue($e, $trace);
         });
+
+        return $deferred->promise();
     }
 }
