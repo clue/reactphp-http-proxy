@@ -2,6 +2,9 @@
 
 // A simple example which requests https://google.com/ through an HTTP CONNECT proxy.
 // The proxy can be given as first argument and defaults to localhost:8080 otherwise.
+//
+// For illustration purposes only. If you want to send HTTP requests in a real
+// world project, take a look at https://github.com/clue/reactphp-buzz#http-proxy
 
 use Clue\React\HttpProxy\ProxyConnector;
 use React\Socket\Connector;

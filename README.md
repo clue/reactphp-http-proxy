@@ -39,6 +39,7 @@ existing higher-level protocol implementation.
   * [ProxyConnector](#proxyconnector)
     * [Plain TCP connections](#plain-tcp-connections)
     * [Secure TLS connections](#secure-tls-connections)
+    * [HTTP requests](#http-requests)
     * [Connection timeout](#connection-timeout)
     * [DNS resolution](#dns-resolution)
     * [Authentication](#authentication)
@@ -49,7 +50,7 @@ existing higher-level protocol implementation.
 * [License](#license)
 * [More](#more)
 
-### Quickstart example
+## Quickstart example
 
 The following example code demonstrates how this library can be used to send a
 secure HTTPS request to google.com through a local HTTP proxy server:
@@ -187,6 +188,15 @@ $connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionI
 
 > Note how secure TLS connections are in fact entirely handled outside of
   this HTTP CONNECT client implementation.
+
+#### HTTP requests
+
+HTTP operates on a higher layer than this low-level HTTP CONNECT implementation.
+If you want to issue HTTP requests, you can add a dependency for
+[clue/reactphp-buzz](https://github.com/clue/reactphp-buzz).
+It can interact with this library by issuing all
+[HTTP requests through a HTTP CONNECT proxy server](https://github.com/clue/reactphp-buzz#http-proxy).
+This works for both plain HTTP and TLS-encrypted HTTPS requests.
 
 #### Connection timeout
 
