@@ -69,6 +69,36 @@ class ProxyConnectorTest extends AbstractTestCase
         $proxy->connect('google.com:80?hostname=www.google.com');
     }
 
+    public function testCreatesConnectionToIpv4Address()
+    {
+        $promise = new Promise(function () { });
+        $this->connector->expects($this->once())->method('connect')->with('tcp://proxy.example.com:80?hostname=127.0.0.1')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $proxy->connect('127.0.0.1:80');
+    }
+
+    public function testCreatesConnectionToIpv6Address()
+    {
+        $promise = new Promise(function () { });
+        $this->connector->expects($this->once())->method('connect')->with('tcp://proxy.example.com:80?hostname=%3A%3A1')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $proxy->connect('[::1]:80');
+    }
+
+    public function testCreatesConnectionToIpv4AddressOverIpv6Proxy()
+    {
+        $promise = new Promise(function () { });
+        $this->connector->expects($this->once())->method('connect')->with('tcp://[::1]:80?hostname=127.0.0.1')->willReturn($promise);
+
+        $proxy = new ProxyConnector('[::1]:80', $this->connector);
+
+        $proxy->connect('127.0.0.1:80');
+    }
+
     public function testCreatesConnectionToHttpsPort()
     {
         $promise = new Promise(function () { });
@@ -114,6 +144,19 @@ class ProxyConnectorTest extends AbstractTestCase
         $proxy = new ProxyConnector('proxy.example.com', $this->connector);
 
         $proxy->connect('google.com:80');
+    }
+
+    public function testWillWriteIpv6HostToOpenConnection()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+        $stream->expects($this->once())->method('write')->with("CONNECT [::1]:80 HTTP/1.1\r\nHost: [::1]:80\r\n\r\n");
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $proxy->connect('[::1]:80');
     }
 
     public function testWillProxyAuthorizationHeaderIfProxyUriContainsAuthentication()
