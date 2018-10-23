@@ -6,6 +6,9 @@
 // This example highlights how changing from direct connection to using a proxy
 // actually adds very little complexity and does not mess with your actual
 // network protocol otherwise.
+//
+// For illustration purposes only. If you want to send HTTP requests in a real
+// world project, take a look at https://github.com/clue/reactphp-buzz#http-proxy
 
 use Clue\React\HttpProxy\ProxyConnector;
 use React\Socket\Connector;
