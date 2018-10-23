@@ -5,6 +5,7 @@ namespace Tests\Clue\React\HttpProxy;
 use Clue\React\HttpProxy\ProxyConnector;
 use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
+use React\Promise\Deferred;
 
 class ProxyConnectorTest extends AbstractTestCase
 {
@@ -355,22 +356,84 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->emit('data', array("HTTP/1.1 200 OK\r\n\r\nhello!"));
     }
 
-    public function testCancelPromiseWillCloseOpenConnectionAndReject()
+    public function testCancelPromiseWhileConnectionIsReadyWillCloseOpenConnectionAndReject()
     {
         $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
         $stream->expects($this->once())->method('close');
 
-        $promise = \React\Promise\resolve($stream);
-        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+        $deferred = new Deferred();
+
+        $this->connector->expects($this->once())->method('connect')->willReturn($deferred->promise());
 
         $proxy = new ProxyConnector('proxy.example.com', $this->connector);
 
         $promise = $proxy->connect('google.com:80');
+
+        $deferred->resolve($stream);
 
         $this->assertInstanceOf('React\Promise\CancellablePromiseInterface', $promise);
 
         $promise->cancel();
 
         $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_ECONNABORTED));
+    }
+
+    public function testCancelPromiseDuringConnectionShouldNotCreateGarbageCycles()
+    {
+        $pending = new Promise(function () { });
+        $this->connector->expects($this->once())->method('connect')->willReturn($pending);
+
+        gc_collect_cycles();
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+        $promise->cancel();
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function testCancelPromiseWhileConnectionIsReadyShouldNotCreateGarbageCycles()
+    {
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
+        }
+
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+
+        $deferred = new Deferred();
+
+        $this->connector->expects($this->once())->method('connect')->willReturn($deferred->promise());
+
+        gc_collect_cycles();
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+        $deferred->resolve($stream);
+        $promise->cancel();
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function testRejectedConnectionShouldNotCreateGarbageCycles()
+    {
+        if (class_exists('React\Promise\When')) {
+            $this->markTestSkipped('Not supported on legacy Promise v1 API');
+        }
+
+        $rejected = \React\Promise\reject(new \RuntimeException());
+        $this->connector->expects($this->once())->method('connect')->willReturn($rejected);
+
+        gc_collect_cycles();
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
     }
 }

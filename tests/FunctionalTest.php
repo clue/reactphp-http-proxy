@@ -72,4 +72,20 @@ class FunctionalTest extends AbstractTestCase
         $this->setExpectedException('RuntimeException', 'Connection to proxy lost', SOCKET_ECONNRESET);
         Block\await($promise, $this->loop, 3.0);
     }
+
+    /**
+     * @requires PHP 7
+     */
+    public function testCancelWhileConnectingShouldNotCreateGarbageCycles()
+    {
+        $proxy = new ProxyConnector('google.com', $this->dnsConnector);
+
+        gc_collect_cycles();
+
+        $promise = $proxy->connect('google.com:80');
+        $promise->cancel();
+        unset($promise);
+
+        $this->assertEquals(0, gc_collect_cycles());
+    }
 }
