@@ -285,16 +285,24 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnce());
     }
 
-    public function testRejectsIfConnectorRejects()
+    public function testRejectsWithPreviousIfConnectorRejects()
     {
-        $promise = \React\Promise\reject(new \RuntimeException());
+        $promise = \React\Promise\reject($previous = new \RuntimeException());
         $this->connector->expects($this->once())->method('connect')->willReturn($promise);
 
         $proxy = new ProxyConnector('proxy.example.com', $this->connector);
 
         $promise = $proxy->connect('google.com:80');
 
-        $promise->then(null, $this->expectCallableOnce());
+        $promise->then(null, $this->expectCallableOnceWithException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because connection to proxy failed (ECONNREFUSED)',
+            SOCKET_ECONNREFUSED
+        ));
+
+        $promise->then(null, $this->expectCallableOnceWith($this->callback(function (\Exception $e) use ($previous) {
+            return $e->getPrevious() === $previous;
+        })));
     }
 
     public function testRejectsAndClosesIfStreamWritesNonHttp()
@@ -311,7 +319,11 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array("invalid\r\n\r\n"));
 
-        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EBADMSG));
+        $promise->then(null, $this->expectCallableOnceWithException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because proxy returned invalid response (EBADMSG)',
+            SOCKET_EBADMSG
+        ));
     }
 
     public function testRejectsAndClosesIfStreamWritesTooMuchData()
@@ -326,9 +338,13 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise = $proxy->connect('google.com:80');
 
         $stream->expects($this->once())->method('close');
-        $stream->emit('data', array(str_repeat('*', 100000)));
+        $stream->emit('data', array(str_repeat('*', 10000)));
 
-        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EMSGSIZE));
+        $promise->then(null, $this->expectCallableOnceWithException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because proxy response headers exceed maximum of 8 KiB (EMSGSIZE)',
+            SOCKET_EMSGSIZE
+        ));
     }
 
     public function testRejectsAndClosesIfStreamReturnsProyAuthenticationRequired()
@@ -345,7 +361,11 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array("HTTP/1.1 407 Proxy Authentication Required\r\n\r\n"));
 
-        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_EACCES));
+        $promise->then(null, $this->expectCallableOnceWithException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because proxy denied access with HTTP error code 407 (Proxy Authentication Required) (EACCES)',
+            SOCKET_EACCES
+        ));
     }
 
     public function testRejectsAndClosesIfStreamReturnsNonSuccess()
@@ -362,7 +382,35 @@ class ProxyConnectorTest extends AbstractTestCase
         $stream->expects($this->once())->method('close');
         $stream->emit('data', array("HTTP/1.1 403 Not allowed\r\n\r\n"));
 
-        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_ECONNREFUSED));
+        $promise->then(null, $this->expectCallableOnceWithException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 403 (Not allowed) (ECONNREFUSED)',
+            SOCKET_ECONNREFUSED
+        ));
+    }
+
+    public function testRejectsWithPreviousExceptionIfStreamEmitsError()
+    {
+        $stream = $this->getMockBuilder('React\Socket\Connection')->disableOriginalConstructor()->setMethods(array('close', 'write'))->getMock();
+
+        $promise = \React\Promise\resolve($stream);
+        $this->connector->expects($this->once())->method('connect')->willReturn($promise);
+
+        $proxy = new ProxyConnector('proxy.example.com', $this->connector);
+
+        $promise = $proxy->connect('google.com:80');
+
+        $stream->emit('error', array($previous = new \RuntimeException()));
+
+        $promise->then(null, $this->expectCallableOnceWithException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because connection to proxy caused a stream error (EIO)',
+            SOCKET_EIO
+        ));
+
+        $promise->then(null, $this->expectCallableOnceWith($this->callback(function (\Exception $e) use ($previous) {
+            return $e->getPrevious() === $previous;
+        })));
     }
 
     public function testResolvesIfStreamReturnsSuccess()
@@ -423,7 +471,11 @@ class ProxyConnectorTest extends AbstractTestCase
 
         $promise->cancel();
 
-        $promise->then(null, $this->expectCallableOnceWithExceptionCode(SOCKET_ECONNABORTED));
+        $promise->then(null, $this->expectCallableOnceWithException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 cancelled while waiting for proxy (ECONNABORTED)',
+            SOCKET_ECONNABORTED
+        ));
     }
 
     public function testCancelPromiseDuringConnectionShouldNotCreateGarbageCycles()

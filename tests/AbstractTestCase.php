@@ -32,37 +32,19 @@ abstract class AbstractTestCase extends PHPUnit_Framework_TestCase
         $mock
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->equalTo($value));
+            ->with($value);
 
         return $mock;
     }
 
-    protected function expectCallableOnceWithExceptionCode($code)
+    protected function expectCallableOnceWithException($class, $message, $code)
     {
-        $mock = $this->createCallableMock();
-        $mock
-            ->expects($this->once())
-            ->method('__invoke')
-            ->with($this->logicalAnd(
-                $this->isInstanceOf('Exception'),
-                $this->callback(function ($e) use ($code) {
-                    return $e->getCode() === $code;
-                })
-            ));
-
-        return $mock;
-    }
-
-
-    protected function expectCallableOnceParameter($type)
-    {
-        $mock = $this->createCallableMock();
-        $mock
-            ->expects($this->once())
-            ->method('__invoke')
-            ->with($this->isInstanceOf($type));
-
-        return $mock;
+        return $this->expectCallableOnceWith($this->logicalAnd(
+            $this->isInstanceOf($class),
+            $this->callback(function (\Exception $e) use ($message, $code) {
+                return strpos($e->getMessage(), $message) !== false && $e->getCode() === $code;
+            })
+        ));
     }
 
     /**
