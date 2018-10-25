@@ -43,9 +43,7 @@ class ProxyConnector implements ConnectorInterface
 {
     private $connector;
     private $proxyUri;
-    private $proxyAuth = '';
-    /** @var array */
-    private $proxyHeaders;
+    private $headers = '';
 
     /**
      * Instantiate a new ProxyConnector which uses the given $proxyUrl
@@ -93,12 +91,17 @@ class ProxyConnector implements ConnectorInterface
 
         // prepare Proxy-Authorization header if URI contains username/password
         if (isset($parts['user']) || isset($parts['pass'])) {
-            $this->proxyAuth = 'Basic ' . base64_encode(
+            $this->headers = 'Proxy-Authorization: Basic ' . base64_encode(
                 rawurldecode($parts['user'] . ':' . (isset($parts['pass']) ? $parts['pass'] : ''))
-            );
+            ) . "\r\n";
         }
 
-        $this->proxyHeaders = $httpHeaders;
+        // append any additional custom request headers
+        foreach ($httpHeaders as $name => $values) {
+            foreach ((array)$values as $value) {
+                $this->headers .= $name . ': ' . $value . "\r\n";
+            }
+        }
     }
 
     public function connect($uri)
@@ -156,9 +159,8 @@ class ProxyConnector implements ConnectorInterface
             $connecting->cancel();
         });
 
-        $auth = $this->proxyAuth;
-        $headers = $this->proxyHeaders;
-        $connecting->then(function (ConnectionInterface $stream) use ($target, $auth, $headers, $deferred) {
+        $headers = $this->headers;
+        $connecting->then(function (ConnectionInterface $stream) use ($target, $headers, $deferred) {
             // keep buffering data until headers are complete
             $buffer = '';
             $stream->on('data', $fn = function ($chunk) use (&$buffer, $deferred, $stream, &$fn) {
@@ -218,13 +220,7 @@ class ProxyConnector implements ConnectorInterface
                 $deferred->reject(new RuntimeException('Connection to proxy lost while waiting for response (ECONNRESET)', defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104));
             });
 
-            $headers['Host'] = $target;
-            if ($auth !== '') {
-                $headers['Proxy-Authorization'] = $auth;
-            }
-            $request = new Psr7\Request('CONNECT', $target, $headers);
-            $request = $request->withRequestTarget($target);
-            $stream->write(Psr7\str($request));
+            $stream->write("CONNECT " . $target . " HTTP/1.1\r\nHost: " . $target . "\r\n" . $headers . "\r\n");
         }, function (Exception $e) use ($deferred) {
             $deferred->reject($e = new RuntimeException(
                 'Unable to connect to proxy (ECONNREFUSED)',

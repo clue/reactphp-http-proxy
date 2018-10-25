@@ -43,6 +43,7 @@ existing higher-level protocol implementation.
     * [Connection timeout](#connection-timeout)
     * [DNS resolution](#dns-resolution)
     * [Authentication](#authentication)
+    * [Advanced HTTP headers](#advanced-http-headers)
     * [Advanced secure proxy connections](#advanced-secure-proxy-connections)
     * [Advanced Unix domain sockets](#advanced-unix-domain-sockets)
 * [Install](#install)
@@ -306,6 +307,22 @@ $proxy = new ProxyConnector(
   proxy server, it is expected to reject each connection attempt with a
   `407` (Proxy Authentication Required) response status code and an exception
   error code of `SOCKET_EACCES` (13).
+
+#### Advanced HTTP headers
+
+The `ProxyConnector` constructor accepts an optional array of custom request
+headers to send in the `CONNECT` request. This can be useful if you're using a
+custom proxy setup or authentication scheme if the proxy server does not support
+basic [authentication](#authentication) as documented above. This is rarely used
+in practice, but may be useful for some more advanced use cases. In this case,
+you may simply pass an assoc array of additional request headers like this:
+
+```php
+$proxy = new ProxyConnector('127.0.0.1:8080', $connector, array(
+    'Proxy-Authentication' =>  'Bearer abc123',
+    'User-Agent' => 'ReactPHP'
+));
+```
 
 #### Advanced secure proxy connections
 
