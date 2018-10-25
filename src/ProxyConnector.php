@@ -146,9 +146,9 @@ class ProxyConnector implements ConnectorInterface
 
         $connecting = $this->connector->connect($proxyUri);
 
-        $deferred = new Deferred(function ($_, $reject) use ($connecting) {
+        $deferred = new Deferred(function ($_, $reject) use ($connecting, $uri) {
             $reject(new RuntimeException(
-                'Connection cancelled while waiting for proxy (ECONNABORTED)',
+                'Connection to ' . $uri . ' cancelled while waiting for proxy (ECONNABORTED)',
                 defined('SOCKET_ECONNABORTED') ? SOCKET_ECONNABORTED : 103
             ));
 
@@ -160,10 +160,10 @@ class ProxyConnector implements ConnectorInterface
         });
 
         $headers = $this->headers;
-        $connecting->then(function (ConnectionInterface $stream) use ($target, $headers, $deferred) {
+        $connecting->then(function (ConnectionInterface $stream) use ($target, $headers, $deferred, $uri) {
             // keep buffering data until headers are complete
             $buffer = '';
-            $stream->on('data', $fn = function ($chunk) use (&$buffer, $deferred, $stream, &$fn) {
+            $stream->on('data', $fn = function ($chunk) use (&$buffer, $deferred, $stream, &$fn, $uri) {
                 $buffer .= $chunk;
 
                 $pos = strpos($buffer, "\r\n\r\n");
@@ -176,19 +176,29 @@ class ProxyConnector implements ConnectorInterface
                     try {
                         $response = Psr7\parse_response(substr($buffer, 0, $pos));
                     } catch (Exception $e) {
-                        $deferred->reject(new RuntimeException('Invalid response received from proxy (EBADMSG)', defined('SOCKET_EBADMSG') ? SOCKET_EBADMSG: 71, $e));
+                        $deferred->reject(new RuntimeException(
+                            'Connection to ' . $uri . ' failed because proxy returned invalid response (EBADMSG)',
+                            defined('SOCKET_EBADMSG') ? SOCKET_EBADMSG: 71,
+                            $e
+                        ));
                         $stream->close();
                         return;
                     }
 
                     if ($response->getStatusCode() === 407) {
                         // map status code 407 (Proxy Authentication Required) to EACCES
-                        $deferred->reject(new RuntimeException('Proxy denied connection due to invalid authentication ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (EACCES)', defined('SOCKET_EACCES') ? SOCKET_EACCES : 13));
+                        $deferred->reject(new RuntimeException(
+                            'Connection to ' . $uri . ' failed because proxy denied access with HTTP error code ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (EACCES)',
+                            defined('SOCKET_EACCES') ? SOCKET_EACCES : 13
+                        ));
                         $stream->close();
                         return;
                     } elseif ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
                         // map non-2xx status code to ECONNREFUSED
-                        $deferred->reject(new RuntimeException('Proxy refused connection with HTTP error code ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (ECONNREFUSED)', defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111));
+                        $deferred->reject(new RuntimeException(
+                            'Connection to ' . $uri . ' failed because proxy refused connection with HTTP error code ' . $response->getStatusCode() . ' (' . $response->getReasonPhrase() . ') (ECONNREFUSED)',
+                            defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
+                        ));
                         $stream->close();
                         return;
                     }
@@ -207,23 +217,33 @@ class ProxyConnector implements ConnectorInterface
 
                 // stop buffering when 8 KiB have been read
                 if (isset($buffer[8192])) {
-                    $deferred->reject(new RuntimeException('Proxy must not send more than 8 KiB of headers (EMSGSIZE)', defined('SOCKET_EMSGSIZE') ? SOCKET_EMSGSIZE : 90));
+                    $deferred->reject(new RuntimeException(
+                        'Connection to ' . $uri . ' failed because proxy response headers exceed maximum of 8 KiB (EMSGSIZE)',
+                        defined('SOCKET_EMSGSIZE') ? SOCKET_EMSGSIZE : 90
+                    ));
                     $stream->close();
                 }
             });
 
-            $stream->on('error', function (Exception $e) use ($deferred) {
-                $deferred->reject(new RuntimeException('Stream error while waiting for response from proxy (EIO)', defined('SOCKET_EIO') ? SOCKET_EIO : 5, $e));
+            $stream->on('error', function (Exception $e) use ($deferred, $uri) {
+                $deferred->reject(new RuntimeException(
+                    'Connection to ' . $uri . ' failed because connection to proxy caused a stream error (EIO)',
+                    defined('SOCKET_EIO') ? SOCKET_EIO : 5,
+                    $e
+                ));
             });
 
-            $stream->on('close', function () use ($deferred) {
-                $deferred->reject(new RuntimeException('Connection to proxy lost while waiting for response (ECONNRESET)', defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104));
+            $stream->on('close', function () use ($deferred, $uri) {
+                $deferred->reject(new RuntimeException(
+                    'Connection to ' . $uri . ' failed because connection to proxy was lost while waiting for response (ECONNRESET)',
+                    defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104
+                ));
             });
 
             $stream->write("CONNECT " . $target . " HTTP/1.1\r\nHost: " . $target . "\r\n" . $headers . "\r\n");
-        }, function (Exception $e) use ($deferred) {
+        }, function (Exception $e) use ($deferred, $uri) {
             $deferred->reject($e = new RuntimeException(
-                'Unable to connect to proxy (ECONNREFUSED)',
+                'Connection to ' . $uri . ' failed because connection to proxy failed (ECONNREFUSED)',
                 defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111,
                 $e
             ));

@@ -34,7 +34,11 @@ class FunctionalTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->setExpectedException('RuntimeException', 'Unable to connect to proxy', SOCKET_ECONNREFUSED);
+        $this->setExpectedException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because connection to proxy failed (ECONNREFUSED)',
+            SOCKET_ECONNREFUSED
+        );
         Block\await($promise, $this->loop, 3.0);
     }
 
@@ -44,7 +48,11 @@ class FunctionalTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->setExpectedException('RuntimeException', '405 (Method Not Allowed)', SOCKET_ECONNREFUSED);
+        $this->setExpectedException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 405 (Method Not Allowed) (ECONNREFUSED)',
+            SOCKET_ECONNREFUSED
+        );
         Block\await($promise, $this->loop, 3.0);
     }
 
@@ -59,7 +67,11 @@ class FunctionalTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->setExpectedException('RuntimeException', '405 (Method Not Allowed)', SOCKET_ECONNREFUSED);
+        $this->setExpectedException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 405 (Method Not Allowed) (ECONNREFUSED)',
+            SOCKET_ECONNREFUSED
+        );
         Block\await($promise, $this->loop, 3.0);
     }
 
@@ -69,7 +81,11 @@ class FunctionalTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->setExpectedException('RuntimeException', 'Connection to proxy lost', SOCKET_ECONNRESET);
+        $this->setExpectedException(
+            'RuntimeException',
+            'Connection to tcp://google.com:80 failed because connection to proxy was lost while waiting for response (ECONNRESET)',
+            SOCKET_ECONNRESET
+        );
         Block\await($promise, $this->loop, 3.0);
     }
 
