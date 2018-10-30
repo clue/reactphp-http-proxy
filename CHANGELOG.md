@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.4.0 (2018-10-30)
+
+*   Feature: Improve error reporting for failed connection attempts and improve
+    cancellation forwarding during proxy connection setup.
+    (#23 and #26 by @clue)
+
+    All error messages now always contain a reference to the remote URI to give
+    more details which connection actually failed and the reason for this error.
+    Similarly, any underlying connection issues to the proxy server will now be
+    reported as part of the previous exception.
+
+    For most common use cases this means that simply reporting the `Exception`
+    message should give the most relevant details for any connection issues:
+
+    ```php
+    $promise = $proxy->connect('tcp://example.com:80');
+    $promise->then(function (ConnectionInterface $conn) use ($loop) {
+        // …
+    }, function (Exception $e) {
+        echo $e->getMessage();
+    });
+    ```
+
+*   Feature: Add support for custom HTTP request headers.
+    (#25 by @valga and @clue)
+
+    ```php
+    // new: now supports custom HTTP request headers
+    $proxy = new ProxyConnector('127.0.0.1:8080', $connector, array(
+        'Proxy-Authentication' =>  'Bearer abc123',
+        'User-Agent' => 'ReactPHP'
+    ));
+    ```
+
+*   Fix: Fix connecting to IPv6 destination hosts.
+    (#22 by @clue)
+
+*   Link to clue/reactphp-buzz for HTTP requests and update project homepage.
+    (#21 and #24 by @clue)
+
 ## 1.3.0 (2018-02-13)
 
 *   Feature: Support communication over Unix domain sockets (UDS)

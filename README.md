@@ -9,7 +9,7 @@ conceal the origin address (anonymity) or to circumvent address blocking
 (geoblocking). While many (public) HTTP CONNECT proxy servers often limit this
 to HTTPS port `443` only, this can technically be used to tunnel any
 TCP/IP-based protocol (HTTP, SMTP, IMAP etc.).
-This library provides a simple API to create these tunneled connection for you.
+This library provides a simple API to create these tunneled connections for you.
 Because it implements ReactPHP's standard
 [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface),
 it can simply be used in place of a normal connector.
@@ -26,11 +26,11 @@ existing higher-level protocol implementation.
   ReactPHP's standard
   [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface).
 * **Lightweight, SOLID design** -
-  Provides a thin abstraction that is [*just good enough*](http://en.wikipedia.org/wiki/Principle_of_good_enough)
+  Provides a thin abstraction that is [*just good enough*](https://en.wikipedia.org/wiki/Principle_of_good_enough)
   and does not get in your way.
   Builds on top of well-tested components and well-established concepts instead of reinventing the wheel.
 * **Good test coverage** -
-  Comes with an automated tests suite and is regularly tested against actual proxy servers in the wild
+  Comes with an automated tests suite and is regularly tested against actual proxy servers in the wild.
 
 **Table of contents**
 
@@ -230,7 +230,7 @@ $connector->connect('tcp://google.com:80')->then(function ($stream) {
 
 See also any of the [examples](examples).
 
-> Note how connection timeout is in fact entirely handled outside of this
+> Note how the connection timeout is in fact entirely handled outside of this
   HTTP CONNECT client implementation.
 
 #### DNS resolution
@@ -256,7 +256,7 @@ However, wrapping the `ProxyConnector` in ReactPHP's
 [`Connector`](https://github.com/reactphp/socket#connector) actually
 performs local DNS resolution unless explicitly defined otherwise.
 Given that remote DNS resolution is assumed to be the preferred mode, all
-other examples explicitly disable DNS resoltion like this:
+other examples explicitly disable DNS resolution like this:
 
 ```php
 $connector = new Connector($loop, array(
@@ -269,7 +269,7 @@ If you want to explicitly use *local DNS resolution*, you can use the following 
 
 ```php
 // set up Connector which uses Google's public DNS (8.8.8.8)
-$connector = Connector($loop, array(
+$connector = new Connector($loop, array(
     'tcp' => $proxy,
     'dns' => '8.8.8.8'
 ));
@@ -319,7 +319,7 @@ you may simply pass an assoc array of additional request headers like this:
 
 ```php
 $proxy = new ProxyConnector('127.0.0.1:8080', $connector, array(
-    'Proxy-Authentication' =>  'Bearer abc123',
+    'Proxy-Authorization' =>  'Bearer abc123',
     'User-Agent' => 'ReactPHP'
 ));
 ```
@@ -385,11 +385,11 @@ $proxy = new ProxyConnector('http+unix://user:pass@/tmp/proxy.sock', $connector)
 The recommended way to install this library is [through Composer](https://getcomposer.org).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
-This project follows [SemVer](http://semver.org/).
+This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/http-proxy-react:^1.3
+$ composer require clue/http-proxy-react:^1.4
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -423,7 +423,10 @@ $ php vendor/bin/phpunit --exclude-group internet
 
 ## License
 
-MIT
+This project is released under the permissive [MIT license](LICENSE).
+
+> Did you know that I offer custom development services and issuing invoices for
+  sponsorships of releases and for contributions? Contact me (@clue) for details.
 
 ## More
 
