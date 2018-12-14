@@ -443,6 +443,12 @@ This project is released under the permissive [MIT license](LICENSE).
   which also provides an implementation of the same
   [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface)
   so that supporting either proxy protocol should be fairly trivial.
+* As an alternative to an HTTP CONNECT proxy, you may also want to look into
+  using an SSH proxy (SSH tunnel) instead.
+  You may want to use [clue/reactphp-ssh-proxy](https://github.com/clue/reactphp-ssh-proxy)
+  which also provides an implementation of the same
+  [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface)
+  so that supporting either proxy protocol should be fairly trivial.
 * If you're dealing with public proxies, you'll likely have to work with mixed
   quality and unreliable proxies. You may want to look into using
   [clue/reactphp-connection-manager-extra](https://github.com/clue/reactphp-connection-manager-extra)
