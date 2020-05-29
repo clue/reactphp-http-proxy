@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Clue\React\HttpProxy;
+namespace Clue\Tests\React\HttpProxy;
 
 use React\EventLoop\Factory;
 use Clue\React\HttpProxy\ProxyConnector;

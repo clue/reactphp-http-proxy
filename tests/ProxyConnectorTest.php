@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Clue\React\HttpProxy;
+namespace Clue\Tests\React\HttpProxy;
 
 use Clue\React\HttpProxy\ProxyConnector;
 use React\Promise\Promise;

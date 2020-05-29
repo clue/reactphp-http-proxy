@@ -14,7 +14,7 @@
         "psr-4": { "Clue\\React\\HttpProxy\\": "src/" }
     },
     "autoload-dev": {
-        "psr-4": { "Tests\\Clue\\React\\HttpProxy\\": "tests/" }
+        "psr-4": { "Clue\\Tests\\React\\HttpProxy\\": "tests/" }
     },
     "require": {
         "php": ">=5.3",
