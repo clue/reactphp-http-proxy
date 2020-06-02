@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Clue\React\HttpProxy;
+namespace Clue\Tests\React\HttpProxy;
 
 use React\EventLoop\Factory;
 use Clue\React\HttpProxy\ProxyConnector;
@@ -97,11 +97,25 @@ class FunctionalTest extends AbstractTestCase
         $proxy = new ProxyConnector('google.com', $this->dnsConnector);
 
         gc_collect_cycles();
+        gc_collect_cycles(); // clear twice to avoid leftovers in PHP 7.4 with ext-xdebug and code coverage turned on
 
         $promise = $proxy->connect('google.com:80');
         $promise->cancel();
         unset($promise);
 
         $this->assertEquals(0, gc_collect_cycles());
+    }
+
+    public function setExpectedException($exception, $message = '', $code = 0)
+    {
+        if (method_exists($this, 'expectException')) {
+            $this->expectException($exception);
+            if ($message !== null) {
+                $this->expectExceptionMessage($message);
+            }
+            $this->expectExceptionCode($code);
+        } else {
+            parent::setExpectedException($exception, $message, $code);
+        }
     }
 }

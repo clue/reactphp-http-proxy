@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Clue\React\HttpProxy;
+namespace Clue\Tests\React\HttpProxy;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-abstract class AbstractTestCase extends PHPUnit_Framework_TestCase
+abstract class AbstractTestCase extends \PHPUnit\Framework\TestCase
 {
     protected function expectCallableNever()
     {
@@ -52,14 +52,7 @@ abstract class AbstractTestCase extends PHPUnit_Framework_TestCase
      */
     protected function createCallableMock()
     {
-        return $this->getMockBuilder('Tests\\Clue\\React\\HttpProxy\\CallableStub')->getMock();
-    }
-}
-
-class CallableStub
-{
-    public function __invoke()
-    {
+        return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
     }
 }
 
