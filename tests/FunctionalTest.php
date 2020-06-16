@@ -16,7 +16,10 @@ class FunctionalTest extends AbstractTestCase
     private $tcpConnector;
     private $dnsConnector;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function setUpConnector()
     {
         $this->loop = Factory::create();
 

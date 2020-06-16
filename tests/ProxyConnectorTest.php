@@ -11,32 +11,29 @@ class ProxyConnectorTest extends AbstractTestCase
 {
     private $connector;
 
-    public function setUp()
+    /**
+     * @before
+     */
+    public function setUpMock()
     {
         $this->connector = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testInvalidProxy()
     {
+        $this->setExpectedException('InvalidArgumentException');
         new ProxyConnector('///', $this->connector);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testInvalidProxyScheme()
     {
+        $this->setExpectedException('InvalidArgumentException');
         new ProxyConnector('ftp://example.com', $this->connector);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testInvalidHttpsUnixScheme()
     {
+        $this->setExpectedException('InvalidArgumentException');
         new ProxyConnector('https+unix:///tmp/proxy.sock', $this->connector);
     }
 
