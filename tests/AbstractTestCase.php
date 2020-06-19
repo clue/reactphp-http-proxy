@@ -54,5 +54,19 @@ abstract class AbstractTestCase extends \PHPUnit\Framework\TestCase
     {
         return $this->getMockBuilder('stdClass')->setMethods(array('__invoke'))->getMock();
     }
+
+    public function setExpectedException($exception, $message = '', $code = 0)
+    {
+        if (method_exists($this, 'expectException')) {
+            $this->expectException($exception);
+            if ($message !== '') {
+                $this->expectExceptionMessage($message);
+            }
+            $this->expectExceptionCode($code);
+        } else {
+            parent::setExpectedException($exception, $message, $code);
+        }
+    }
+
 }
 
