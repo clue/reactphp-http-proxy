@@ -1,6 +1,6 @@
 # clue/reactphp-http-proxy [![Build Status](https://travis-ci.org/clue/reactphp-http-proxy.svg?branch=master)](https://travis-ci.org/clue/reactphp-http-proxy)
 
-Async HTTP proxy connector, use any TCP/IP-based protocol through an HTTP
+Async HTTP proxy connector, tunnel any TCP/IP-based protocol through an HTTP
 CONNECT proxy server, built on top of [ReactPHP](https://reactphp.org).
 
 HTTP CONNECT proxy servers (also commonly known as "HTTPS proxy" or "SSL proxy")
@@ -34,6 +34,7 @@ existing higher-level protocol implementation.
 
 **Table of contents**
 
+* [Support us](#support-us)
 * [Quickstart example](#quickstart-example)
 * [Usage](#usage)
   * [ProxyConnector](#proxyconnector)
@@ -50,6 +51,16 @@ existing higher-level protocol implementation.
 * [Tests](#tests)
 * [License](#license)
 * [More](#more)
+
+## Support us
+
+We invest a lot of time developing, maintaining and updating our awesome
+open-source projects. You can help us sustain this high-quality of our work by
+[becoming a sponsor on GitHub](https://github.com/sponsors/clue). Sponsors get
+numerous benefits in return, see our [sponsoring page](https://github.com/sponsors/clue)
+for details.
+
+Let's take these projects to the next level together! 🚀
 
 ## Quickstart example
 
@@ -319,7 +330,7 @@ you may simply pass an assoc array of additional request headers like this:
 
 ```php
 $proxy = new ProxyConnector('127.0.0.1:8080', $connector, array(
-    'Proxy-Authorization' =>  'Bearer abc123',
+    'Proxy-Authorization' => 'Bearer abc123',
     'User-Agent' => 'ReactPHP'
 ));
 ```
@@ -389,7 +400,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/http-proxy-react:^1.4
+$ composer require clue/http-proxy-react:^1.5
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.0 (2020-06-19)
+
+*   Feature / Fix: Support PHP 7.4 by skipping unneeded cleanup of exception trace args.
+    (#33 by @clue)
+
+*   Clean up test suite and add `.gitattributes` to exclude dev files from exports.
+    Run tests on PHP 7.4, PHPUnit 9 and simplify test matrix.
+    Link to using SSH proxy (SSH tunnel) as an alternative.
+    (#27 by @clue and #31, #32 and #34 by @SimonFrings)
+
 ## 1.4.0 (2018-10-30)
 
 *   Feature: Improve error reporting for failed connection attempts and improve
@@ -16,7 +26,7 @@
 
     ```php
     $promise = $proxy->connect('tcp://example.com:80');
-    $promise->then(function (ConnectionInterface $conn) use ($loop) {
+    $promise->then(function (ConnectionInterface $connection) {
         // …
     }, function (Exception $e) {
         echo $e->getMessage();
@@ -29,7 +39,7 @@
     ```php
     // new: now supports custom HTTP request headers
     $proxy = new ProxyConnector('127.0.0.1:8080', $connector, array(
-        'Proxy-Authentication' =>  'Bearer abc123',
+        'Proxy-Authorization' => 'Bearer abc123',
         'User-Agent' => 'ReactPHP'
     ));
     ```
