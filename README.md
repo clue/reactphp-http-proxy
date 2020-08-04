@@ -225,7 +225,7 @@ $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseI
 }); 
 ```
 
-See also [ReactPHP's HTTP client](https://github.com/reactphp/http#client-usage) for more details.
+See also [ReactPHP's HTTP client](https://github.com/reactphp/http#client-usage) and any of the [examples](examples) for more details.
 
 #### Connection timeout
 

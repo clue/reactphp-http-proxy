@@ -2,13 +2,17 @@
 
 // A simple example which requests https://google.com/ either directly or through
 // an HTTP CONNECT proxy.
+// To run the example, go to the project root and run:
+//
+// $ php examples/12-optional-proxy-raw-https-protocol.php
+//
 // The Proxy can be given as first argument or does not use a proxy otherwise.
 // This example highlights how changing from direct connection to using a proxy
 // actually adds very little complexity and does not mess with your actual
 // network protocol otherwise.
 //
 // For illustration purposes only. If you want to send HTTP requests in a real
-// world project, take a look at https://github.com/clue/reactphp-buzz#http-proxy
+// world project, take a look at example #01 and https://github.com/reactphp/http#client-usage.
 
 use Clue\React\HttpProxy\ProxyConnector;
 use React\Socket\Connector;

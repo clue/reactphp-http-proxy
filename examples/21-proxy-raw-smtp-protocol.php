@@ -1,7 +1,15 @@
 <?php
 
-// A simple example which uses a plain SMTP connection to Googlemail through a HTTP CONNECT proxy.
-// Proxy can be given as first argument and defaults to localhost:8080 otherwise.
+// A simple example which requests https://google.com/ through an HTTP CONNECT proxy.
+// You can use any kind of proxy, for example https://github.com/leproxy/leproxy and execute it like this:
+//
+// $ php leproxy-latest.php
+//
+// To run the example, go to the project root and run:
+//
+// $ php examples/21-proxy-raw-smtp-protocol.php
+//
+// The proxy can be given as first argument and defaults to localhost:8080 otherwise.
 // Please note that MANY public proxies do not allow SMTP connections, YMMV.
 
 use Clue\React\HttpProxy\ProxyConnector;
