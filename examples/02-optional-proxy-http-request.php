@@ -5,9 +5,13 @@
 //
 // $ php examples/02-optional-proxy-http-request.php
 //
+// If you chose the optional route, you can use any kind of proxy, for example https://github.com/leproxy/leproxy and execute it like this:
+//
+// $ php leproxy.php
+//
 // To run the same example with your proxy, the proxy URL can be given as an environment variable:
 //
-// $ http_proxy=127.0.0.1.8181 php examples/02-optional-proxy-http-request.php
+// $ http_proxy=127.0.0.2:8080 php examples/02-optional-proxy-http-request.php
 
 require __DIR__ . '/../vendor/autoload.php';
 

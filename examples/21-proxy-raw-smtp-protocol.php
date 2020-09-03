@@ -3,13 +3,17 @@
 // A simple example which requests https://google.com/ through an HTTP CONNECT proxy.
 // You can use any kind of proxy, for example https://github.com/leproxy/leproxy and execute it like this:
 //
-// $ php leproxy-latest.php
+// $ php leproxy.php
 //
+// The proxy defaults to localhost:8080.
 // To run the example, go to the project root and run:
 //
 // $ php examples/21-proxy-raw-smtp-protocol.php
 //
-// The proxy can be given as first argument and defaults to localhost:8080 otherwise.
+// To run the same example with your proxy, the proxy URL can be given as an environment variable:
+//
+// $ http_proxy=127.0.0.2:8080 php examples/21-proxy-raw-smtp-protocol.php
+//
 // Please note that MANY public proxies do not allow SMTP connections, YMMV.
 
 use Clue\React\HttpProxy\ProxyConnector;
@@ -18,7 +22,10 @@ use React\Socket\ConnectionInterface;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$url = isset($argv[1]) ? $argv[1] : '127.0.0.1:8080';
+$url = getenv('http_proxy');
+if ($url === false) {
+    $url = 'localhost:8080';
+}
 
 $loop = React\EventLoop\Factory::create();
 
