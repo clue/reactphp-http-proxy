@@ -40,7 +40,7 @@ class FunctionalTest extends AbstractTestCase
         $this->setExpectedException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because connection to proxy failed (ECONNREFUSED)',
-            SOCKET_ECONNREFUSED
+            defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         );
         Block\await($promise, $this->loop, 3.0);
     }
@@ -54,7 +54,7 @@ class FunctionalTest extends AbstractTestCase
         $this->setExpectedException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 405 (Method Not Allowed) (ECONNREFUSED)',
-            SOCKET_ECONNREFUSED
+            defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         );
         Block\await($promise, $this->loop, 3.0);
     }
@@ -73,7 +73,7 @@ class FunctionalTest extends AbstractTestCase
         $this->setExpectedException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 405 (Method Not Allowed) (ECONNREFUSED)',
-            SOCKET_ECONNREFUSED
+            defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         );
         Block\await($promise, $this->loop, 3.0);
     }
@@ -87,7 +87,7 @@ class FunctionalTest extends AbstractTestCase
         $this->setExpectedException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because connection to proxy was lost while waiting for response (ECONNRESET)',
-            SOCKET_ECONNRESET
+            defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104
         );
         Block\await($promise, $this->loop, 3.0);
     }
@@ -107,18 +107,5 @@ class FunctionalTest extends AbstractTestCase
         unset($promise);
 
         $this->assertEquals(0, gc_collect_cycles());
-    }
-
-    public function setExpectedException($exception, $message = '', $code = 0)
-    {
-        if (method_exists($this, 'expectException')) {
-            $this->expectException($exception);
-            if ($message !== null) {
-                $this->expectExceptionMessage($message);
-            }
-            $this->expectExceptionCode($code);
-        } else {
-            parent::setExpectedException($exception, $message, $code);
-        }
     }
 }

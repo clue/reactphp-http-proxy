@@ -294,7 +294,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because connection to proxy failed (ECONNREFUSED)',
-            SOCKET_ECONNREFUSED
+            defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         ));
 
         $promise->then(null, $this->expectCallableOnceWith($this->callback(function (\Exception $e) use ($previous) {
@@ -319,7 +319,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because proxy returned invalid response (EBADMSG)',
-            SOCKET_EBADMSG
+            defined('SOCKET_EBADMSG') ? SOCKET_EBADMSG: 71
         ));
     }
 
@@ -340,7 +340,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because proxy response headers exceed maximum of 8 KiB (EMSGSIZE)',
-            SOCKET_EMSGSIZE
+            defined('SOCKET_EMSGSIZE') ? SOCKET_EMSGSIZE : 90
         ));
     }
 
@@ -361,7 +361,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because proxy denied access with HTTP error code 407 (Proxy Authentication Required) (EACCES)',
-            SOCKET_EACCES
+            defined('SOCKET_EACCES') ? SOCKET_EACCES : 13
         ));
     }
 
@@ -382,7 +382,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 403 (Not allowed) (ECONNREFUSED)',
-            SOCKET_ECONNREFUSED
+            defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         ));
     }
 
@@ -402,7 +402,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithException(
             'RuntimeException',
             'Connection to tcp://google.com:80 failed because connection to proxy caused a stream error (EIO)',
-            SOCKET_EIO
+            defined('SOCKET_EIO') ? SOCKET_EIO : 5
         ));
 
         $promise->then(null, $this->expectCallableOnceWith($this->callback(function (\Exception $e) use ($previous) {
@@ -471,7 +471,7 @@ class ProxyConnectorTest extends AbstractTestCase
         $promise->then(null, $this->expectCallableOnceWithException(
             'RuntimeException',
             'Connection to tcp://google.com:80 cancelled while waiting for proxy (ECONNABORTED)',
-            SOCKET_ECONNABORTED
+            defined('SOCKET_ECONNABORTED') ? SOCKET_ECONNABORTED : 103
         ));
     }
 
