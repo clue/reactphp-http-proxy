@@ -205,7 +205,9 @@ $connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionI
 
 This library also allows you to send HTTP requests through an HTTP CONNECT proxy server.
 
-In order to send HTTP requests, you first have to add a dependency for [ReactPHP's async HTTP client](https://github.com/reactphp/http#client-usage). This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like this:
+In order to send HTTP requests, you first have to add a dependency for
+[ReactPHP's async HTTP client](https://github.com/reactphp/http#client-usage).
+This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like this:
 
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector(
@@ -222,10 +224,13 @@ $browser = new React\Http\Browser($loop, $connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
-}); 
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 ```
 
-See also [ReactPHP's HTTP client](https://github.com/reactphp/http#client-usage) and any of the [examples](examples) for more details.
+See also [ReactPHP's HTTP client](https://github.com/reactphp/http#client-usage)
+and any of the [examples](examples) for more details.
 
 #### Connection timeout
 

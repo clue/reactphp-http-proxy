@@ -42,6 +42,8 @@ $connector->connect('tls://google.com:443')->then(function (ConnectionInterface 
     $stream->on('data', function ($chunk) {
         echo $chunk;
     });
-}, 'printf');
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 
 $loop->run();
