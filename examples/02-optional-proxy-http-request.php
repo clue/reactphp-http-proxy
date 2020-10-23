@@ -33,6 +33,8 @@ $browser = new React\Http\Browser($loop, $connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
-}, 'printf');
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 
 $loop->run();

@@ -8,11 +8,11 @@
 // The proxy defaults to localhost:8080.
 // To run the example go to the project root and run:
 //
-// $ php examples/01-http-requests.php
+// $ php examples/01-http-request.php
 //
 // To run the same example with your proxy, the proxy URL can be given as an environment variable:
 //
-// $ http_proxy=127.0.0.2:8080 php examples/01-http-requests.php
+// $ http_proxy=127.0.0.2:8080 php examples/01-http-request.php
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -33,6 +33,8 @@ $browser = new React\Http\Browser($loop, $connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
-}, 'printf');
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 
 $loop->run();

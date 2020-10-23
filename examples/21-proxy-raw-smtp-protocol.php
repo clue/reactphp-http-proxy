@@ -42,6 +42,8 @@ $connector->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionI
         echo $chunk;
         $stream->write("QUIT\r\n");
     });
-}, 'printf');
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 
 $loop->run();
