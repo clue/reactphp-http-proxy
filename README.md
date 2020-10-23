@@ -20,7 +20,7 @@ existing higher-level protocol implementation.
   Send any number of HTTP CONNECT requests in parallel and process their
   responses as soon as results come in.
   The Promise-based design provides a *sane* interface to working with out of
-  bound responses and possible connection errors.
+  order responses and possible connection errors.
 * **Standard interfaces** -
   Allows easy integration with existing higher-level components by implementing
   ReactPHP's standard
@@ -37,16 +37,16 @@ existing higher-level protocol implementation.
 * [Support us](#support-us)
 * [Quickstart example](#quickstart-example)
 * [Usage](#usage)
-  * [ProxyConnector](#proxyconnector)
-    * [Plain TCP connections](#plain-tcp-connections)
-    * [Secure TLS connections](#secure-tls-connections)
-    * [HTTP requests](#http-requests)
-    * [Connection timeout](#connection-timeout)
-    * [DNS resolution](#dns-resolution)
-    * [Authentication](#authentication)
-    * [Advanced HTTP headers](#advanced-http-headers)
-    * [Advanced secure proxy connections](#advanced-secure-proxy-connections)
-    * [Advanced Unix domain sockets](#advanced-unix-domain-sockets)
+    * [ProxyConnector](#proxyconnector)
+        * [Plain TCP connections](#plain-tcp-connections)
+        * [Secure TLS connections](#secure-tls-connections)
+        * [HTTP requests](#http-requests)
+        * [Connection timeout](#connection-timeout)
+        * [DNS resolution](#dns-resolution)
+        * [Authentication](#authentication)
+        * [Advanced HTTP headers](#advanced-http-headers)
+        * [Advanced secure proxy connections](#advanced-secure-proxy-connections)
+        * [Advanced Unix domain sockets](#advanced-unix-domain-sockets)
 * [Install](#install)
 * [Tests](#tests)
 * [License](#license)
@@ -422,7 +422,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/http-proxy-react:^1.5
+$ composer require clue/http-proxy-react:^1.6
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0 (2020-10-23)
+
+*   Enhanced documentation for ReactPHP's new HTTP client.
+    (#35 and #37 by @SimonFrings)
+
+*   Improve test suite, prepare PHP 8 support and support PHPUnit 9.3.
+    (#36 by @SimonFrings)
+
 ## 1.5.0 (2020-06-19)
 
 *   Feature / Fix: Support PHP 7.4 by skipping unneeded cleanup of exception trace args.
