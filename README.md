@@ -1,4 +1,6 @@
-# clue/reactphp-http-proxy [![Build Status](https://travis-ci.org/clue/reactphp-http-proxy.svg?branch=master)](https://travis-ci.org/clue/reactphp-http-proxy)
+# clue/reactphp-http-proxy
+
+[![CI status](https://github.com/clue/reactphp-http-proxy/workflows/CI/badge.svg)](https://github.com/clue/reactphp-http-proxy/actions)
 
 Async HTTP proxy connector, tunnel any TCP/IP-based protocol through an HTTP
 CONNECT proxy server, built on top of [ReactPHP](https://reactphp.org).
