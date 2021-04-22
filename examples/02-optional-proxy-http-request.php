@@ -20,8 +20,10 @@ $loop = React\EventLoop\Factory::create();
 $connector = null;
 $url = getenv('http_proxy');
 if ($url !== false) {
-    $connector = new React\Socket\Connector($loop);
-    $proxy = new Clue\React\HttpProxy\ProxyConnector($url, $connector);
+    $proxy = new Clue\React\HttpProxy\ProxyConnector(
+        $url,
+        new React\Socket\Connector($loop)
+    );
     $connector = new React\Socket\Connector($loop, array(
         'tcp' => $proxy,
         'timeout' => 3.0,

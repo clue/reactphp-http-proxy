@@ -72,16 +72,19 @@ secure HTTPS request to google.com through a local HTTP proxy server:
 ```php
 $loop = React\EventLoop\Factory::create();
 
-$proxy = new ProxyConnector('127.0.0.1:8080', new Connector($loop));
-$connector = new Connector($loop, array(
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
+$connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
     'timeout' => 3.0,
     'dns' => false
 ));
 
-$connector->connect('tls://google.com:443')->then(function (ConnectionInterface $stream) {
-    $stream->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
-    $stream->on('data', function ($chunk) {
+$connector->connect('tls://google.com:443')->then(function (React\Socket\ConnectionInterface $connection) {
+    $connection->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
+    $connection->on('data', function ($chunk) {
         echo $chunk;
     });
 }, 'printf');
@@ -106,8 +109,8 @@ Its constructor simply accepts an HTTP proxy URL and a connector used to connect
 to the proxy server address:
 
 ```php
-$connector = new Connector($loop);
-$proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
+$connector = new React\Socket\Connector($loop);
+$proxy = new Clue\React\HttpProxy\ProxyConnector('http://127.0.0.1:8080', $connector);
 ```
 
 The proxy URL may or may not contain a scheme and port definition. The default
@@ -133,9 +136,9 @@ This makes it fairly simple to add HTTP CONNECT proxy support to pretty much any
 higher-level component:
 
 ```diff
-- $client = new SomeClient($connector);
-+ $proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
-+ $client = new SomeClient($proxy);
+- $acme = new AcmeApi($connector);
++ $proxy = new Clue\React\HttpProxy\ProxyConnector('http://127.0.0.1:8080', $connector);
++ $acme = new AcmeApi($proxy);
 ```
 
 #### Plain TCP connections
@@ -147,11 +150,14 @@ As documented above, you can simply invoke its `connect()` method to establish
 a streaming plain TCP/IP connection and use any higher level protocol like so:
 
 ```php
-$proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
 
-$proxy->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInterface $stream) {
-    $stream->write("EHLO local\r\n");
-    $stream->on('data', function ($chunk) use ($stream) {
+$proxy->connect('tcp://smtp.googlemail.com:587')->then(function (React\Socket\ConnectionInterface $connection) {
+    $connection->write("EHLO local\r\n");
+    $connection->on('data', function ($chunk) use ($connection) {
         echo $chunk;
     });
 });
@@ -161,14 +167,19 @@ You can either use the `ProxyConnector` directly or you may want to wrap this co
 in ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
 
 ```php
-$connector = new Connector($loop, array(
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
+
+$connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
     'dns' => false
 ));
 
-$connector->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInterface $stream) {
-    $stream->write("EHLO local\r\n");
-    $stream->on('data', function ($chunk) use ($stream) {
+$connector->connect('tcp://smtp.googlemail.com:587')->then(function (React\Socket\ConnectionInterface $connection) {
+    $connection->write("EHLO local\r\n");
+    $connection->on('data', function ($chunk) use ($connection) {
         echo $chunk;
     });
 });
@@ -186,15 +197,19 @@ ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector) or the
 low-level [`SecureConnector`](https://github.com/reactphp/socket#secureconnector):
 
 ```php
-$proxy = new ProxyConnector('http://127.0.0.1:8080', $connector);
-$connector = new Connector($loop, array(
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
+
+$connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
     'dns' => false
 ));
 
-$connector->connect('tls://smtp.googlemail.com:465')->then(function (ConnectionInterface $stream) {
-    $stream->write("EHLO local\r\n");
-    $stream->on('data', function ($chunk) use ($stream) {
+$connector->connect('tls://smtp.googlemail.com:465')->then(function (React\Socket\ConnectionInterface $connection) {
+    $connection->write("EHLO local\r\n");
+    $connection->on('data', function ($chunk) use ($connection) {
         echo $chunk;
     });
 });
@@ -213,7 +228,7 @@ This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like th
 
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector(
-    'http://127.0.0.1:8080',
+    '127.0.0.1:8080',
     new React\Socket\Connector($loop)
 );
 
@@ -252,13 +267,18 @@ It provides the same `connect()` method, but will automatically reject the
 underlying connection attempt if it takes too long:
 
 ```php
-$connector = new Connector($loop, array(
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
+
+$connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
     'dns' => false,
     'timeout' => 3.0
 ));
 
-$connector->connect('tcp://google.com:80')->then(function ($stream) {
+$connector->connect('tcp://google.com:80')->then(function ($connection) {
     // connection succeeded within 3.0 seconds
 });
 ```
@@ -294,7 +314,12 @@ Given that remote DNS resolution is assumed to be the preferred mode, all
 other examples explicitly disable DNS resolution like this:
 
 ```php
-$connector = new Connector($loop, array(
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
+
+$connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -303,8 +328,13 @@ $connector = new Connector($loop, array(
 If you want to explicitly use *local DNS resolution*, you can use the following code:
 
 ```php
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
+
 // set up Connector which uses Google's public DNS (8.8.8.8)
-$connector = new Connector($loop, array(
+$connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
     'dns' => '8.8.8.8'
 ));
@@ -319,7 +349,10 @@ If your HTTP proxy server requires authentication, you may pass the username and
 password as part of the HTTP proxy URL like this:
 
 ```php
-$proxy = new ProxyConnector('http://user:pass@127.0.0.1:8080', $connector);
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    'http://user:pass@127.0.0.1:8080',
+    new React\Socket\Connector($loop)
+);
 ```
 
 Note that both the username and password must be percent-encoded if they contain
@@ -329,7 +362,7 @@ special characters:
 $user = 'he:llo';
 $pass = 'p@ss';
 
-$proxy = new ProxyConnector(
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
     rawurlencode($user) . ':' . rawurlencode($pass) . '@127.0.0.1:8080',
     $connector
 );
@@ -353,10 +386,14 @@ in practice, but may be useful for some more advanced use cases. In this case,
 you may simply pass an assoc array of additional request headers like this:
 
 ```php
-$proxy = new ProxyConnector('127.0.0.1:8080', $connector, array(
-    'Proxy-Authorization' => 'Bearer abc123',
-    'User-Agent' => 'ReactPHP'
-));
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    '127.0.0.1:8080',
+    $connector,
+    array(
+        'Proxy-Authorization' => 'Bearer abc123',
+        'User-Agent' => 'ReactPHP'
+    )
+);
 ```
 
 #### Advanced secure proxy connections
@@ -373,8 +410,10 @@ If you want to connect to a (rather rare) HTTPS proxy, you may want use the
 instance to create a secure connection to the proxy:
 
 ```php
-$connector = new Connector($loop);
-$proxy = new ProxyConnector('https://127.0.0.1:443', $connector);
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    'https://127.0.0.1:443',
+    new React\Socket\Connector($loop)
+);
 
 $proxy->connect('tcp://smtp.googlemail.com:587');
 ```
@@ -391,9 +430,12 @@ having to rely on explicit [authentication](#authentication).
 You can simply use the `http+unix://` URI scheme like this:
 
 ```php
-$proxy = new ProxyConnector('http+unix:///tmp/proxy.sock', $connector);
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    'http+unix:///tmp/proxy.sock',
+    new React\Socket\Connector($loop)
+);
 
-$proxy->connect('tcp://google.com:80')->then(function (ConnectionInterface $stream) {
+$proxy->connect('tcp://google.com:80')->then(function (React\Socket\ConnectionInterface $connection) {
     // connected…
 });
 ```
@@ -402,7 +444,10 @@ Similarly, you can also combine this with [authentication](#authentication)
 like this:
 
 ```php
-$proxy = new ProxyConnector('http+unix://user:pass@/tmp/proxy.sock', $connector);
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    'http+unix://user:pass@/tmp/proxy.sock',
+    new React\Socket\Connector($loop)
+);
 ```
 
 > Note that Unix domain sockets (UDS) are considered advanced usage and PHP only

@@ -22,7 +22,10 @@ if ($url === false) {
 }
 
 $loop = React\EventLoop\Factory::create();
-$proxy = new Clue\React\HttpProxy\ProxyConnector($url, new React\Socket\Connector($loop));
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    $url,
+    new React\Socket\Connector($loop)
+);
 
 $connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
