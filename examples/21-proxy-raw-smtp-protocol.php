@@ -16,10 +16,6 @@
 //
 // Please note that MANY public proxies do not allow SMTP connections, YMMV.
 
-use Clue\React\HttpProxy\ProxyConnector;
-use React\Socket\Connector;
-use React\Socket\ConnectionInterface;
-
 require __DIR__ . '/../vendor/autoload.php';
 
 $url = getenv('http_proxy');
@@ -29,18 +25,22 @@ if ($url === false) {
 
 $loop = React\EventLoop\Factory::create();
 
-$proxy = new ProxyConnector($url, new Connector($loop));
-$connector = new Connector($loop, array(
+$proxy = new Clue\React\HttpProxy\ProxyConnector(
+    $url,
+    new React\Socket\Connector($loop)
+);
+
+$connector = new React\Socket\Connector($loop, array(
     'tcp' => $proxy,
     'timeout' => 3.0,
     'dns' => false
 ));
 
-$connector->connect('tcp://smtp.googlemail.com:587')->then(function (ConnectionInterface $stream) {
-    $stream->write("EHLO local\r\n");
-    $stream->on('data', function ($chunk) use ($stream) {
+$connector->connect('tcp://smtp.googlemail.com:587')->then(function (React\Socket\ConnectionInterface $connection) {
+    $connection->write("EHLO local\r\n");
+    $connection->on('data', function ($chunk) use ($connection) {
         echo $chunk;
-        $stream->write("QUIT\r\n");
+        $connection->write("QUIT\r\n");
     });
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
