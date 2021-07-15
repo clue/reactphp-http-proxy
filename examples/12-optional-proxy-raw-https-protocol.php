@@ -22,9 +22,7 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$loop = React\EventLoop\Factory::create();
-
-$connector = new React\Socket\Connector($loop);
+$connector = new React\Socket\Connector();
 
 $url = getenv('http_proxy');
 if ($url !== false) {
@@ -32,7 +30,8 @@ if ($url !== false) {
         $url,
         $connector
     );
-    $connector = new React\Socket\Connector($loop, array(
+
+    $connector = new React\Socket\Connector(null, array(
         'tcp' => $proxy,
         'timeout' => 3.0,
         'dns' => false
@@ -47,5 +46,3 @@ $connector->connect('tls://google.com:443')->then(function (React\Socket\Connect
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
-
-$loop->run();
