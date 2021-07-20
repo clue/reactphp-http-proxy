@@ -22,20 +22,17 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$connector = new React\Socket\Connector();
-
 $url = getenv('http_proxy');
 if ($url !== false) {
-    $proxy = new Clue\React\HttpProxy\ProxyConnector(
-        $url,
-        $connector
-    );
+    $proxy = new Clue\React\HttpProxy\ProxyConnector($url);
 
     $connector = new React\Socket\Connector(null, array(
         'tcp' => $proxy,
         'timeout' => 3.0,
         'dns' => false
     ));
+} else {
+    $connector = new React\Socket\Connector();
 }
 
 $connector->connect('tls://google.com:443')->then(function (React\Socket\ConnectionInterface $connection) {

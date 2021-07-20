@@ -26,10 +26,7 @@ if ($url === false) {
     $url = 'localhost:8080';
 }
 
-$proxy = new Clue\React\HttpProxy\ProxyConnector(
-    $url,
-    new React\Socket\Connector()
-);
+$proxy = new Clue\React\HttpProxy\ProxyConnector($url);
 
 $connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,

@@ -18,10 +18,7 @@ require __DIR__ . '/../vendor/autoload.php';
 $connector = null;
 $url = getenv('http_proxy');
 if ($url !== false) {
-    $proxy = new Clue\React\HttpProxy\ProxyConnector(
-        $url,
-        new React\Socket\Connector()
-    );
+    $proxy = new Clue\React\HttpProxy\ProxyConnector($url);
 
     $connector = new React\Socket\Connector(null, array(
         'tcp' => $proxy,

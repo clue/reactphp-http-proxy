@@ -26,7 +26,7 @@ if ($url === false) {
 
 $proxy = new Clue\React\HttpProxy\ProxyConnector(
     $url,
-    new React\Socket\Connector(),
+    null,
     array(
         'X-Custom-Header-1' => 'Value-1',
         'X-Custom-Header-2' => 'Value-2',
