@@ -19,6 +19,17 @@ class ProxyConnectorTest extends AbstractTestCase
         $this->connector = $this->getMockBuilder('React\Socket\ConnectorInterface')->getMock();
     }
 
+    public function testConstructWithoutConnectorAssignsConnectorAutomatically()
+    {
+        $proxy = new ProxyConnector('proxy.example.com');
+
+        $ref = new \ReflectionProperty($proxy, 'connector');
+        $ref->setAccessible(true);
+        $connector = $ref->getValue($proxy);
+
+        $this->assertInstanceOf('React\Socket\ConnectorInterface', $connector);
+    }
+
     public function testInvalidProxy()
     {
         $this->setExpectedException('InvalidArgumentException');

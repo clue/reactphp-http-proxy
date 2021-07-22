@@ -9,8 +9,10 @@ use RingCentral\Psr7;
 use React\Promise;
 use React\Promise\Deferred;
 use React\Socket\ConnectionInterface;
+use React\Socket\Connector;
 use React\Socket\ConnectorInterface;
 use React\Socket\FixedUriConnector;
+use React\Socket\UnixConnector;
 
 /**
  * A simple Connector that uses an HTTP CONNECT proxy to create plain TCP/IP connections to any destination
@@ -51,13 +53,11 @@ class ProxyConnector implements ConnectorInterface
      * @param string $proxyUrl The proxy URL may or may not contain a scheme and
      *     port definition. The default port will be `80` for HTTP (or `443` for
      *     HTTPS), but many common HTTP proxy servers use custom ports.
-     * @param ConnectorInterface $connector In its most simple form, the given
-     *     connector will be a \React\Socket\Connector if you want to connect to
-     *     a given IP address.
+     * @param ?ConnectorInterface $connector (Optional) Connector to use.
      * @param array $httpHeaders Custom HTTP headers to be sent to the proxy.
      * @throws InvalidArgumentException if the proxy URL is invalid
      */
-    public function __construct($proxyUrl, ConnectorInterface $connector, array $httpHeaders = array())
+    public function __construct($proxyUrl, ConnectorInterface $connector = null, array $httpHeaders = array())
     {
         // support `http+unix://` scheme for Unix domain socket (UDS) paths
         if (preg_match('/^http\+unix:\/\/(.*?@)?(.+?)$/', $proxyUrl, $match)) {
@@ -67,7 +67,7 @@ class ProxyConnector implements ConnectorInterface
             // connector uses Unix transport scheme and explicit path given
             $connector = new FixedUriConnector(
                 'unix://' . $match[2],
-                $connector
+                $connector ?: new UnixConnector()
             );
         }
 
@@ -86,7 +86,7 @@ class ProxyConnector implements ConnectorInterface
         }
         $parts['scheme'] = $parts['scheme'] === 'https' ? 'tls' : 'tcp';
 
-        $this->connector = $connector;
+        $this->connector = $connector ?: new Connector();
         $this->proxyUri = $parts['scheme'] . '://' . $parts['host'] . ':' . $parts['port'];
 
         // prepare Proxy-Authorization header if URI contains username/password

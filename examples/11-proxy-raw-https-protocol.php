@@ -24,14 +24,9 @@ if ($url === false) {
     $url = 'localhost:8080';
 }
 
-$loop = React\EventLoop\Factory::create();
+$proxy = new Clue\React\HttpProxy\ProxyConnector($url);
 
-$proxy = new Clue\React\HttpProxy\ProxyConnector(
-    $url,
-    new React\Socket\Connector($loop)
-);
-
-$connector = new React\Socket\Connector($loop, array(
+$connector = new React\Socket\Connector(null, array(
     'tcp' => $proxy,
     'timeout' => 3.0,
     'dns' => false
@@ -45,5 +40,3 @@ $connector->connect('tls://google.com:443')->then(function (React\Socket\Connect
 }, function (Exception $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
-
-$loop->run();

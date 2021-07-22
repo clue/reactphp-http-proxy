@@ -2,19 +2,16 @@
 
 namespace Clue\Tests\React\HttpProxy;
 
-use React\EventLoop\Factory;
-use Clue\React\HttpProxy\ProxyConnector;
-use React\Socket\TcpConnector;
-use React\Socket\DnsConnector;
 use Clue\React\Block;
-use React\Socket\SecureConnector;
+use Clue\React\HttpProxy\ProxyConnector;
+use React\EventLoop\Factory;
+use React\Socket\Connector;
 
 /** @group internet */
 class FunctionalTest extends AbstractTestCase
 {
     private $loop;
-    private $tcpConnector;
-    private $dnsConnector;
+    private $connector;
 
     /**
      * @before
@@ -22,18 +19,12 @@ class FunctionalTest extends AbstractTestCase
     public function setUpConnector()
     {
         $this->loop = Factory::create();
-
-        $this->tcpConnector = new TcpConnector($this->loop);
-
-        $f = new \React\Dns\Resolver\Factory();
-        $resolver = $f->create('8.8.8.8', $this->loop);
-
-        $this->dnsConnector = new DnsConnector($this->tcpConnector, $resolver);
+        $this->connector = new Connector($this->loop);
     }
 
     public function testNonListeningSocketRejectsConnection()
     {
-        $proxy = new ProxyConnector('127.0.0.1:9999', $this->dnsConnector);
+        $proxy = new ProxyConnector('127.0.0.1:9999', $this->connector);
 
         $promise = $proxy->connect('google.com:80');
 
@@ -47,7 +38,7 @@ class FunctionalTest extends AbstractTestCase
 
     public function testPlainGoogleDoesNotAcceptConnectMethod()
     {
-        $proxy = new ProxyConnector('google.com', $this->dnsConnector);
+        $proxy = new ProxyConnector('google.com', $this->connector);
 
         $promise = $proxy->connect('google.com:80');
 
@@ -65,8 +56,7 @@ class FunctionalTest extends AbstractTestCase
             $this->markTestSkipped('TLS not supported on legacy HHVM');
         }
 
-        $secure = new SecureConnector($this->dnsConnector, $this->loop);
-        $proxy = new ProxyConnector('https://google.com:443', $secure);
+        $proxy = new ProxyConnector('https://google.com:443', $this->connector);
 
         $promise = $proxy->connect('google.com:80');
 
@@ -80,7 +70,7 @@ class FunctionalTest extends AbstractTestCase
 
     public function testSecureGoogleDoesNotAcceptPlainStream()
     {
-        $proxy = new ProxyConnector('google.com:443', $this->dnsConnector);
+        $proxy = new ProxyConnector('google.com:443');
 
         $promise = $proxy->connect('google.com:80');
 
@@ -97,7 +87,7 @@ class FunctionalTest extends AbstractTestCase
      */
     public function testCancelWhileConnectingShouldNotCreateGarbageCycles()
     {
-        $proxy = new ProxyConnector('google.com', $this->dnsConnector);
+        $proxy = new ProxyConnector('google.com', $this->connector);
 
         gc_collect_cycles();
         gc_collect_cycles(); // clear twice to avoid leftovers in PHP 7.4 with ext-xdebug and code coverage turned on
