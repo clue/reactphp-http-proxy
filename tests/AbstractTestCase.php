@@ -4,7 +4,7 @@ namespace Clue\Tests\React\HttpProxy;
 
 use PHPUnit\Framework\TestCase;
 
-abstract class AbstractTestCase extends \PHPUnit\Framework\TestCase
+abstract class AbstractTestCase extends TestCase
 {
     protected function expectCallableNever()
     {
@@ -77,6 +77,4 @@ abstract class AbstractTestCase extends \PHPUnit\Framework\TestCase
             parent::setExpectedException($exception, $exceptionMessage, $exceptionCode);
         }
     }
-
 }
-

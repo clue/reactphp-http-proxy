@@ -25,7 +25,7 @@ if ($url === false) {
 
 $proxy = new Clue\React\HttpProxy\ProxyConnector($url);
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'timeout' => 3.0,
     'dns' => false
