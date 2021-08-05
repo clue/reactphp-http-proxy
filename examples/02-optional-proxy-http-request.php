@@ -20,14 +20,14 @@ $url = getenv('http_proxy');
 if ($url !== false) {
     $proxy = new Clue\React\HttpProxy\ProxyConnector($url);
 
-    $connector = new React\Socket\Connector(null, array(
+    $connector = new React\Socket\Connector(array(
         'tcp' => $proxy,
         'timeout' => 3.0,
         'dns' => false
     ));
 }
 
-$browser = new React\Http\Browser(null, $connector);
+$browser = new React\Http\Browser($connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());

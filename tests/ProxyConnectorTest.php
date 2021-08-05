@@ -3,9 +3,9 @@
 namespace Clue\Tests\React\HttpProxy;
 
 use Clue\React\HttpProxy\ProxyConnector;
-use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
 use React\Promise\Deferred;
+use React\Promise\Promise;
 
 class ProxyConnectorTest extends AbstractTestCase
 {

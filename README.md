@@ -73,7 +73,7 @@ secure HTTPS request to google.com through a local HTTP proxy server:
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'timeout' => 3.0,
     'dns' => false
@@ -115,7 +115,7 @@ proxy servers etc.), you can explicitly pass a custom instance of the
 [`ConnectorInterface`](https://github.com/reactphp/socket#connectorinterface):
 
 ```php
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'dns' => '127.0.0.1',
     'tcp' => array(
         'bindto' => '192.168.10.1:0'
@@ -175,7 +175,7 @@ in ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -201,7 +201,7 @@ ReactPHP's [`Connector`](https://github.com/reactphp/socket#connector):
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -228,12 +228,12 @@ This allows you to send both plain HTTP and TLS-encrypted HTTPS requests like th
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
 
-$browser = new React\Http\Browser(null, $connector);
+$browser = new React\Http\Browser($connector);
 
 $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
     var_dump($response->getHeaders(), (string) $response->getBody());
@@ -263,7 +263,7 @@ underlying connection attempt if it takes too long:
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false,
     'timeout' => 3.0
@@ -307,7 +307,7 @@ other examples explicitly disable DNS resolution like this:
 ```php
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => false
 ));
@@ -319,7 +319,7 @@ If you want to explicitly use *local DNS resolution*, you can use the following 
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
 // set up Connector which uses Google's public DNS (8.8.8.8)
-$connector = new React\Socket\Connector(null, array(
+$connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
     'dns' => '8.8.8.8'
 ));
