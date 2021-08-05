@@ -11,7 +11,7 @@
 //
 // To run the same example with your proxy, the proxy URL can be given as an environment variable:
 //
-// $ http_proxy=127.0.0.2:8080 php examples/02-optional-proxy-http-request.php
+// $ http_proxy=127.0.0.1:8080 php examples/02-optional-proxy-http-request.php
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -22,7 +22,6 @@ if ($url !== false) {
 
     $connector = new React\Socket\Connector(array(
         'tcp' => $proxy,
-        'timeout' => 3.0,
         'dns' => false
     ));
 }

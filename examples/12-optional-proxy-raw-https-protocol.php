@@ -11,7 +11,7 @@
 //
 // To run the same example with your proxy, the proxy URL can be given as an environment variable:
 //
-// $ http_proxy=127.0.0.2:8080 php examples/12-optional-proxy-raw-https-protocol.php
+// $ http_proxy=127.0.0.1:8080 php examples/12-optional-proxy-raw-https-protocol.php
 //
 // This example highlights how changing from direct connection to using a proxy
 // actually adds very little complexity and does not mess with your actual

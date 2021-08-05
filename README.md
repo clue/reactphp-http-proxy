@@ -4,7 +4,7 @@
 [![installs on Packagist](https://img.shields.io/packagist/dt/clue/http-proxy-react?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/clue/http-proxy-react)
 
 Async HTTP proxy connector, tunnel any TCP/IP-based protocol through an HTTP
-CONNECT proxy server, built on top of [ReactPHP](https://reactphp.org).
+CONNECT proxy server, built on top of [ReactPHP](https://reactphp.org/).
 
 HTTP CONNECT proxy servers (also commonly known as "HTTPS proxy" or "SSL proxy")
 are commonly used to tunnel HTTPS traffic through an intermediary ("proxy"), to
@@ -71,20 +71,24 @@ The following example code demonstrates how this library can be used to send a
 secure HTTPS request to google.com through a local HTTP proxy server:
 
 ```php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
 $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
 
 $connector = new React\Socket\Connector(array(
     'tcp' => $proxy,
-    'timeout' => 3.0,
     'dns' => false
 ));
 
-$connector->connect('tls://google.com:443')->then(function (React\Socket\ConnectionInterface $connection) {
-    $connection->write("GET / HTTP/1.1\r\nHost: google.com\r\nConnection: close\r\n\r\n");
-    $connection->on('data', function ($chunk) {
-        echo $chunk;
-    });
-}, 'printf');
+$browser = new React\Http\Browser($connector);
+
+$browser->get('https://google.com/')->then(function (Psr\Http\Message\ResponseInterface $response) {
+    var_dump($response->getHeaders(), (string) $response->getBody());
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
+});
 ```
 
 See also the [examples](examples).
@@ -334,7 +338,7 @@ If your HTTP proxy server requires authentication, you may pass the username and
 password as part of the HTTP proxy URL like this:
 
 ```php
-$proxy = new Clue\React\HttpProxy\ProxyConnector('user:pass@127.0.0.1:8080');
+$proxy = new Clue\React\HttpProxy\ProxyConnector('alice:password@127.0.0.1:8080');
 ```
 
 Note that both the username and password must be percent-encoded if they contain
@@ -415,7 +419,7 @@ Similarly, you can also combine this with [authentication](#authentication)
 like this:
 
 ```php
-$proxy = new Clue\React\HttpProxy\ProxyConnector('http+unix://user:pass@/tmp/proxy.sock');
+$proxy = new Clue\React\HttpProxy\ProxyConnector('http+unix://alice:password@/tmp/proxy.sock');
 ```
 
 > Note that Unix domain sockets (UDS) are considered advanced usage and PHP only
@@ -430,7 +434,7 @@ $proxy = new Clue\React\HttpProxy\ProxyConnector('http+unix://user:pass@/tmp/pro
 
 ## Install
 
-The recommended way to install this library is [through Composer](https://getcomposer.org).
+The recommended way to install this library is [through Composer](https://getcomposer.org/).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
 
 This project follows [SemVer](https://semver.org/).
@@ -445,12 +449,12 @@ See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
 This project aims to run on any platform and thus does not require any PHP
 extensions and supports running on legacy PHP 5.3 through current PHP 8+ and
 HHVM.
-It's *highly recommended to use PHP 7+* for this project.
+It's *highly recommended to use the latest supported PHP version* for this project.
 
 ## Tests
 
 To run the test suite, you first need to clone this repo and then install all
-dependencies [through Composer](https://getcomposer.org):
+dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
 $ composer install
@@ -459,14 +463,14 @@ $ composer install
 To run the test suite, go to the project root and run:
 
 ```bash
-$ php vendor/bin/phpunit
+$ vendor/bin/phpunit
 ```
 
 The test suite contains tests that rely on a working internet connection,
 alternatively you can also run it like this:
 
 ```bash
-$ php vendor/bin/phpunit --exclude-group internet
+$ vendor/bin/phpunit --exclude-group internet
 ```
 
 ## License
