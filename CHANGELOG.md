@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.7.0 (2021-08-06)
+
+*   Feature: Simplify usage by supporting new default loop and making `Connector` optional.
+    (#41 and #42 by @clue)
+
+    ```php
+    // old (still supported)
+    $proxy = new Clue\React\HttpProxy\ProxyConnector(
+        '127.0.0.1:8080',
+        new React\Socket\Connector($loop)
+    );
+
+    // new (using default loop)
+    $proxy = new Clue\React\HttpProxy\ProxyConnector('127.0.0.1:8080');
+    ```
+
+*   Documentation improvements and updated examples.
+    (#39 and #43 by @clue and #40 by @PaulRotmann)
+
+*   Improve test suite and use GitHub actions for continuous integration (CI).
+    (#38 by @SimonFrings)
+
 ## 1.6.0 (2020-10-23)
 
 *   Enhanced documentation for ReactPHP's new HTTP client.

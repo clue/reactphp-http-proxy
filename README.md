@@ -441,7 +441,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/http-proxy-react:^1.6
+$ composer require clue/http-proxy-react:^1.7
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
