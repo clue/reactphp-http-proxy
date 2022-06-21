@@ -137,7 +137,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $this->assertInstanceOf('React\Promise\CancellablePromiseInterface', $promise);
+        $this->assertInstanceOf('React\Promise\PromiseInterface', $promise);
 
         $promise->cancel();
     }
@@ -477,7 +477,7 @@ class ProxyConnectorTest extends AbstractTestCase
 
         $deferred->resolve($stream);
 
-        $this->assertInstanceOf('React\Promise\CancellablePromiseInterface', $promise);
+        $this->assertInstanceOf('React\Promise\PromiseInterface', $promise);
 
         $promise->cancel();
 
