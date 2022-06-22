@@ -302,15 +302,17 @@ class ProxyConnectorTest extends AbstractTestCase
 
         $promise = $proxy->connect('google.com:80');
 
-        $promise->then(null, $this->expectCallableOnceWithException(
-            'RuntimeException',
-            'Connection to tcp://google.com:80 failed because connection to proxy failed (ECONNREFUSED)',
-            defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
-        ));
+        $exception = null;
+        $promise->then(null, function ($reason) use (&$exception) {
+            $exception = $reason;
+        });
 
-        $promise->then(null, $this->expectCallableOnceWith($this->callback(function (\Exception $e) use ($previous) {
-            return $e->getPrevious() === $previous;
-        })));
+        assert($exception instanceof \RuntimeException);
+        $this->assertInstanceOf('RuntimeException', $exception);
+        $this->assertEquals('Connection to tcp://google.com:80 failed because connection to proxy failed (ECONNREFUSED)', $exception->getMessage());
+        $this->assertEquals(defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111, $exception->getCode());
+        $this->assertSame($previous, $exception->getPrevious());
+        $this->assertNotEquals('', $exception->getTraceAsString());
     }
 
     public function testRejectsAndClosesIfStreamWritesNonHttp()
