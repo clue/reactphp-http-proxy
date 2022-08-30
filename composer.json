@@ -12,12 +12,12 @@
     ],
     "require": {
         "php": ">=5.3",
-        "react/promise": " ^2.1 || ^1.2.1",
-        "react/socket": "^1.9",
+        "react/promise": "^3 || ^2.1 || ^1.2.1",
+        "react/socket": "^1.12",
         "ringcentral/psr7": "^1.2"
     },
     "require-dev": {
-        "clue/block-react": "^1.1",
+        "clue/block-react": "^1.5",
         "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8",
         "react/event-loop": "^1.2",
         "react/http": "^1.5"
