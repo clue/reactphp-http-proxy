@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.8.0 (2022-09-01)
+
+*   Feature: Full support for PHP 8.1 and PHP 8.2.
+    (#47 and #48 by @SimonFrings)
+
+*   Feature: Mark passwords and URIs as `#[\SensitiveParameter]` (PHP 8.2+).
+    (#49 by @SimonFrings)
+
+*   Feature: Forward compatibility with upcoming Promise v3.
+    (#44 by @clue)
+
+*   Fix: Fix invalid references in exception stack trace.
+    (#45 by @clue)
+
+*   Improve test suite and fix legacy HHVM build.
+    (#46 by @SimonFrings)
+
 ## 1.7.0 (2021-08-06)
 
 *   Feature: Simplify usage by supporting new default loop and making `Connector` optional.

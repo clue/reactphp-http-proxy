@@ -441,7 +441,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/http-proxy-react:^1.7
+composer require clue/http-proxy-react:^1.8
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -457,20 +457,20 @@ To run the test suite, you first need to clone this repo and then install all
 dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
-$ composer install
+composer install
 ```
 
 To run the test suite, go to the project root and run:
 
 ```bash
-$ vendor/bin/phpunit
+vendor/bin/phpunit
 ```
 
 The test suite contains tests that rely on a working internet connection,
 alternatively you can also run it like this:
 
 ```bash
-$ vendor/bin/phpunit --exclude-group internet
+vendor/bin/phpunit --exclude-group internet
 ```
 
 ## License
