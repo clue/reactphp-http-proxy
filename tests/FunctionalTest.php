@@ -2,9 +2,7 @@
 
 namespace Clue\Tests\React\HttpProxy;
 
-use Clue\React\Block;
 use Clue\React\HttpProxy\ProxyConnector;
-use React\EventLoop\Loop;
 
 /** @group internet */
 class FunctionalTest extends AbstractTestCase
@@ -20,7 +18,7 @@ class FunctionalTest extends AbstractTestCase
             'Connection to tcp://google.com:80 failed because connection to proxy failed (ECONNREFUSED)',
             defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         );
-        Block\await($promise, Loop::get(), 3.0);
+        \React\Async\await(\React\Promise\Timer\timeout($promise, 3.0));
     }
 
     public function testPlainGoogleDoesNotAcceptConnectMethod()
@@ -34,7 +32,7 @@ class FunctionalTest extends AbstractTestCase
             'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 405 (Method Not Allowed) (ECONNREFUSED)',
             defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         );
-        Block\await($promise, Loop::get(), 3.0);
+        \React\Async\await(\React\Promise\Timer\timeout($promise, 3.0));
     }
 
     public function testSecureGoogleDoesNotAcceptConnectMethod()
@@ -52,7 +50,7 @@ class FunctionalTest extends AbstractTestCase
             'Connection to tcp://google.com:80 failed because proxy refused connection with HTTP error code 405 (Method Not Allowed) (ECONNREFUSED)',
             defined('SOCKET_ECONNREFUSED') ? SOCKET_ECONNREFUSED : 111
         );
-        Block\await($promise, Loop::get(), 3.0);
+        \React\Async\await(\React\Promise\Timer\timeout($promise, 3.0));
     }
 
     public function testSecureGoogleDoesNotAcceptPlainStream()
@@ -66,7 +64,7 @@ class FunctionalTest extends AbstractTestCase
             'Connection to tcp://google.com:80 failed because connection to proxy was lost while waiting for response (ECONNRESET)',
             defined('SOCKET_ECONNRESET') ? SOCKET_ECONNRESET : 104
         );
-        Block\await($promise, Loop::get(), 3.0);
+        \React\Async\await(\React\Promise\Timer\timeout($promise, 3.0));
     }
 
     /**
