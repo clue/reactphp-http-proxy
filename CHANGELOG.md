@@ -120,7 +120,7 @@
 
     ```php
     $promise = $proxy->connect('imap.example.com:143');
-    $promise->then(null, function (Exeption $e) {
+    $promise->then(null, function (Exception $e) {
         if ($e->getCode() === SOCKET_EACCES) {
             echo 'Failed to authenticate with proxy!';
         }
