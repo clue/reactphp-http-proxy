@@ -170,6 +170,8 @@ $proxy->connect('tcp://smtp.googlemail.com:587')->then(function (React\Socket\Co
     $connection->on('data', function ($chunk) use ($connection) {
         echo $chunk;
     });
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
 ```
 
@@ -189,6 +191,8 @@ $connector->connect('tcp://smtp.googlemail.com:587')->then(function (React\Socke
     $connection->on('data', function ($chunk) use ($connection) {
         echo $chunk;
     });
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
 ```
 
@@ -215,6 +219,8 @@ $connector->connect('tls://smtp.googlemail.com:465')->then(function (React\Socke
     $connection->on('data', function ($chunk) use ($connection) {
         echo $chunk;
     });
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
 ```
 
@@ -247,7 +253,7 @@ $browser->get('https://example.com/')->then(function (Psr\Http\Message\ResponseI
 ```
 
 See also [ReactPHP's HTTP client](https://github.com/reactphp/http#client-usage)
-and any of the [examples](examples) for more details.
+and any of the [examples](examples/) for more details.
 
 #### Connection timeout
 
@@ -275,6 +281,8 @@ $connector = new React\Socket\Connector(array(
 
 $connector->connect('tcp://google.com:80')->then(function ($connection) {
     // connection succeeded within 3.0 seconds
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
 ```
 
@@ -412,6 +420,8 @@ $proxy = new Clue\React\HttpProxy\ProxyConnector('http+unix:///tmp/proxy.sock');
 
 $proxy->connect('tcp://google.com:80')->then(function (React\Socket\ConnectionInterface $connection) {
     // connected…
+}, function (Exception $e) {
+    echo 'Error: ' . $e->getMessage() . PHP_EOL;
 });
 ```
 
